@@ -31,3 +31,6 @@ frontend/.pnpm-store/
 # Backend
 backend/alembic/versions/*.py
 !backend/alembic/versions/.gitkeep
+
+# Other
+STATUS.md
