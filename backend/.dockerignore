@@ -7,8 +7,6 @@ __pycache__
 .git
 .gitignore
 tests
-alembic/versions
-scripts
 .venv
 venv
 *.md
