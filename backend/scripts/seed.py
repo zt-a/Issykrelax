@@ -18,6 +18,11 @@ from app.infrastructure.database.models.user import UserModel
 from app.infrastructure.database.models.wallet import WalletModel
 
 
+async def _check_exists(session: AsyncSession, model: type, slug: str) -> bool:
+    result = await session.execute(select(model).where(model.slug == slug))
+    return result.scalar_one_or_none() is not None
+
+
 async def seed() -> None:
     async with async_session_factory() as session:
         existing = await session.execute(select(UserModel).where(UserModel.email == "admin@issykrelax.kg"))
@@ -50,15 +55,19 @@ async def seed() -> None:
         ]
         cities = []
         for name, slug, popularity in cities_data:
-            city = CityModel(
-                id=uuid.uuid4(),
-                name=name,
-                slug=slug,
-                popularity_score=popularity,
-                is_active=True,
-            )
-            session.add(city)
-            cities.append(city)
+            if not await _check_exists(session, CityModel, slug):
+                city = CityModel(
+                    id=uuid.uuid4(),
+                    name=name,
+                    slug=slug,
+                    popularity_score=popularity,
+                    is_active=True,
+                )
+                session.add(city)
+                cities.append(city)
+            else:
+                result = await session.execute(select(CityModel).where(CityModel.slug == slug))
+                cities.append(result.scalar_one())
 
         # Categories
         categories_data = [
@@ -70,15 +79,19 @@ async def seed() -> None:
         ]
         categories = []
         for name, slug, desc, sort in categories_data:
-            cat = CategoryModel(
-                id=uuid.uuid4(),
-                name=name,
-                slug=slug,
-                description=desc,
-                sort_order=sort,
-            )
-            session.add(cat)
-            categories.append(cat)
+            if not await _check_exists(session, CategoryModel, slug):
+                cat = CategoryModel(
+                    id=uuid.uuid4(),
+                    name=name,
+                    slug=slug,
+                    description=desc,
+                    sort_order=sort,
+                )
+                session.add(cat)
+                categories.append(cat)
+            else:
+                result = await session.execute(select(CategoryModel).where(CategoryModel.slug == slug))
+                categories.append(result.scalar_one())
 
         # Amenities
         amenities_data = [
@@ -99,12 +112,13 @@ async def seed() -> None:
             ("Завтрак включён", "breakfast"),
         ]
         for name, slug in amenities_data:
-            amenity = AmenityModel(
-                id=uuid.uuid4(),
-                name=name,
-                slug=slug,
-            )
-            session.add(amenity)
+            if not await _check_exists(session, AmenityModel, slug):
+                amenity = AmenityModel(
+                    id=uuid.uuid4(),
+                    name=name,
+                    slug=slug,
+                )
+                session.add(amenity)
 
         # Test owner
         owner = UserModel(
@@ -266,9 +280,10 @@ async def seed() -> None:
                     order=order,
                 ))
 
-            amenity_result = await session.execute(
-                select(AmenityModel).where(AmenityModel.slug.in_(pd["amenities"]))
-            )
+            with session.no_autoflush:
+                amenity_result = await session.execute(
+                    select(AmenityModel).where(AmenityModel.slug.in_(pd["amenities"]))
+                )
             for amenity in amenity_result.scalars().all():
                 session.add(PropertyAmenityModel(property_id=prop.id, amenity_id=amenity.id))
 

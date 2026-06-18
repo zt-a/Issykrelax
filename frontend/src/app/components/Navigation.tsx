@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Globe, ChevronDown, User, Heart, Bell, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import { Globe, ChevronDown, User, Heart, Bell, LogOut, Settings, LayoutDashboard, Home, Search, Info, MessageSquare, LogIn, Plus, Menu } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import {
@@ -23,7 +23,6 @@ interface NavigationProps {
 }
 
 export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRole = "tourist" }: NavigationProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
@@ -42,7 +41,8 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRol
 
   return (
     <>
-      <nav style={{ background: "var(--background)", borderBottom: "1px solid var(--border)" }} className="sticky top-0 z-50 shadow-sm">
+      {/* Desktop Header */}
+      <nav style={{ background: "var(--background)", borderBottom: "1px solid var(--border)" }} className="hidden md:block sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -147,65 +147,67 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRol
                 </div>
               )}
             </div>
-
-            {/* Mobile menu button */}
-            <button className="md:hidden p-2 rounded-lg" onClick={() => setMobileOpen(!mobileOpen)} style={{ color: "var(--text-secondary)" }}>
-              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="md:hidden border-t px-4 py-4 space-y-2" style={{ borderColor: "var(--border)", background: "var(--background)" }}>
-            {navLinks.map((link) => (
+      {/* Mobile Bottom Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t" style={{ background: "var(--background)", borderColor: "var(--border)" }}>
+        <div className="flex items-center justify-around h-16 px-2">
+          {navLinks.map((link) => {
+            const icons: Record<string, React.ReactNode> = {
+              landing: <Home size={20} />,
+              search: <Search size={20} />,
+              about: <Info size={20} />,
+              feedback: <MessageSquare size={20} />,
+            };
+            const isActive = currentPage === link.page;
+            return (
               <button
                 key={link.page}
-                onClick={() => { onNavigate(link.page); setMobileOpen(false); }}
-                className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium"
-                style={{ color: "var(--text-primary)" }}
+                onClick={() => onNavigate(link.page)}
+                className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+                style={{ color: isActive ? "var(--lake-blue)" : "var(--text-secondary)" }}
               >
-                {link.label}
+                {icons[link.page]}
+                <span className="text-[10px] font-medium">{link.label}</span>
               </button>
-            ))}
-            <div className="px-4 py-2">
-              <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>КАТЕГОРИИ</div>
-              <div className="flex flex-wrap gap-1">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => { onNavigate("search", { category_id: cat.id }); setMobileOpen(false); }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium"
-                    style={{ background: "var(--surface)", color: "var(--text-primary)" }}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <hr style={{ borderColor: "var(--border)" }} />
-            {userRole === "owner" && (
-              <button onClick={() => { onNavigate("add-listing"); setMobileOpen(false); }} className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium" style={{ color: "var(--lake-blue)" }}>
-                + Добавить объект
-              </button>
-            )}
-            {isLoggedIn ? (
-              <>
-                <button onClick={() => { onNavigate("dashboard"); setMobileOpen(false); }} className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  Мой профиль
-                </button>
-                <button onClick={() => { logout(); onNavigate("landing"); setMobileOpen(false); }} className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  Выйти
-                </button>
-              </>
-            ) : (
-              <button onClick={() => { setAuthMode("login"); setAuthOpen(true); setMobileOpen(false); }} className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                Войти
-              </button>
-            )}
-          </div>
-        )}
+            );
+          })}
+
+          {/* Profile / Auth */}
+          {isLoggedIn ? (
+            <button
+              onClick={() => onNavigate("dashboard")}
+              className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+              style={{ color: currentPage === "dashboard" || currentPage === "owner-dashboard" ? "var(--lake-blue)" : "var(--text-secondary)" }}
+            >
+              <User size={20} />
+              <span className="text-[10px] font-medium">Профиль</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => { setAuthMode("login"); setAuthOpen(true); }}
+              className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <LogIn size={20} />
+              <span className="text-[10px] font-medium">Войти</span>
+            </button>
+          )}
+        </div>
       </nav>
+
+      {/* Mobile FAB for owner add-listing */}
+      {userRole === "owner" && (
+        <button
+          onClick={() => onNavigate("add-listing")}
+          className="md:hidden fixed z-50 bottom-20 right-4 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white"
+          style={{ background: "var(--lake-blue)" }}
+        >
+          <Plus size={24} />
+        </button>
+      )}
 
       <AuthModal
         open={authOpen}

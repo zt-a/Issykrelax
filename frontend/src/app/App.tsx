@@ -119,7 +119,7 @@ function AppContent() {
       )}
 
       <Toaster position="top-right" richColors />
-      <main>
+      <main className="pb-16 md:pb-0">
         {currentPage === "landing" && <LandingPage onNavigate={navigate} />}
         {currentPage === "search" && <SearchResults onNavigate={navigate} params={navParams} />}
         {currentPage === "property" && <PropertyDetails onNavigate={navigate} propertyId={navParams.property_id} />}

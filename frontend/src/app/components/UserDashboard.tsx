@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Calendar, MapPin, CheckCircle, Clock, X, Save, Instagram, Send, Phone, Lock, Users, Bed, Bath, Home, Heart, Star } from "lucide-react";
+import { User, Calendar, MapPin, CheckCircle, Clock, X, Save, Instagram, Send, Phone, Lock, Users, Bed, Bath, Home, Heart, Star, Settings, LayoutDashboard, Shield, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getMyBookings, cancelBooking, confirmGuestCheckIn } from "../services/bookings";
@@ -727,6 +727,41 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
         {activeTab === "profile" && (
           <>
             <ProfileForm user={user} onUpdate={(u) => refresh()} />
+
+            {(user?.role === "admin" || user?.role === "owner") && (
+              <div className="max-w-xl mt-6">
+                <div className="rounded-2xl border p-6" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+                  <h3 className="font-bold mb-4 flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
+                    <Shield size={16} /> Панель управления
+                  </h3>
+                  {user?.role === "admin" && (
+                    <button
+                      onClick={() => onNavigate("admin")}
+                      className="w-full flex items-center justify-between p-4 rounded-xl text-sm font-medium transition-all hover:opacity-80"
+                      style={{ background: "var(--surface)", color: "var(--text-primary)" }}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Settings size={16} /> Административная панель
+                      </span>
+                      <ExternalLink size={14} />
+                    </button>
+                  )}
+                  {user?.role === "owner" && (
+                    <button
+                      onClick={() => onNavigate("owner-dashboard")}
+                      className="w-full flex items-center justify-between p-4 rounded-xl text-sm font-medium transition-all hover:opacity-80"
+                      style={{ background: "var(--surface)", color: "var(--text-primary)" }}
+                    >
+                      <span className="flex items-center gap-2">
+                        <LayoutDashboard size={16} /> Панель владельца
+                      </span>
+                      <ExternalLink size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             <ChangePasswordSection />
           </>
         )}

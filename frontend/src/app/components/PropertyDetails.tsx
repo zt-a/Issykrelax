@@ -193,7 +193,16 @@ export function PropertyDetails({ onNavigate, propertyId }: PropertyDetailsProps
           </div>
         </div>
 
-        <div className="grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl overflow-hidden mb-8" style={{ height: 460 }}>
+        {/* Mobile: horizontal scroll */}
+        <div className="md:hidden flex gap-2 overflow-x-auto snap-x snap-mandatory mb-8" style={{ scrollbarWidth: "none" }}>
+          {photos.slice(0, 5).map((photo, i) => (
+            <div key={i} className="snap-start shrink-0 w-full" style={{ height: 300 }}>
+              <ImgWithFallback src={photo} alt={`Фото ${i + 1}`} className="w-full h-full object-cover rounded-2xl" />
+            </div>
+          ))}
+        </div>
+        {/* Desktop: grid layout */}
+        <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl overflow-hidden mb-8" style={{ height: 460 }}>
           <div className="col-span-2 row-span-2 relative">
             <ImgWithFallback src={photos[0]} alt={property.title} className="w-full h-full object-cover" />
           </div>
