@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Star, Clock, Users, MapPin, Heart, Search, Mountain, Sailboat, Camera, ChevronRight, CheckCircle } from "lucide-react";
+import { SEO } from "./SEO";
+import { breadcrumbSchema } from "../lib/schemas";
 
 interface ToursPageProps {
   onNavigate: (page: string) => void;
@@ -191,6 +193,15 @@ export function ToursPage({ onNavigate }: ToursPageProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      <SEO
+        title="Туры и экскурсии на Иссык-Куле"
+        description="Лучшие туры и экскурсии на Иссык-Куле: конные прогулки в Тянь-Шань, яхтинг, джип-туры, треккинг и обзорные экскурсии. Бронируйте онлайн."
+        canonical="/tours"
+        jsonLd={breadcrumbSchema([
+          { name: "Главная", url: "/" },
+          { name: "Туры и экскурсии", url: "/tours" },
+        ])}
+      />
       <div className="py-10 px-4" style={{ background: "linear-gradient(135deg, #0c4a6e 0%, var(--turquoise) 100%)" }}>
         <div className="max-w-7xl mx-auto text-center text-white">
           <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>

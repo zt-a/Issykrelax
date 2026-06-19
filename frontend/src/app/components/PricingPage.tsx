@@ -1,4 +1,6 @@
 import { CheckCircle, X, Zap, Shield, Crown, HelpCircle } from "lucide-react";
+import { SEO } from "./SEO";
+import { breadcrumbSchema } from "../lib/schemas";
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
@@ -83,6 +85,15 @@ const FAQ = [
 export function PricingPage({ onNavigate }: PricingPageProps) {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      <SEO
+        title="Тарифы для владельцев"
+        description="Разместите объект на IssykRelax. Бесплатный тариф доступен каждому. Премиум-тариф с аналитикой, приоритетной поддержкой и продвижением."
+        canonical="/pricing"
+        jsonLd={breadcrumbSchema([
+          { name: "Главная", url: "/" },
+          { name: "Тарифы", url: "/pricing" },
+        ])}
+      />
       {/* Header */}
       <div className="py-16 px-4 text-center" style={{ background: "linear-gradient(135deg, var(--lake-blue-dark) 0%, var(--lake-blue) 100%)" }}>
         <h1 className="text-4xl font-bold text-white mb-3" style={{ fontFamily: "var(--font-display)" }}>Тарифы для владельцев</h1>

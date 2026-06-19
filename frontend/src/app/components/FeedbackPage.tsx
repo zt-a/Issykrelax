@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, MessageSquare, Send } from "lucide-react";
 import { apiRequest } from "../services/api";
+import { SEO } from "./SEO";
+import { breadcrumbSchema } from "../lib/schemas";
 
 interface FeedbackPageProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
@@ -35,6 +37,15 @@ export function FeedbackPage({ onNavigate }: FeedbackPageProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <SEO
+        title="Обратная связь"
+        description="Свяжитесь с командой IssykRelax. Задайте вопрос, оставьте отзыв или предложение. Мы всегда на связи!"
+        canonical="/feedback"
+        jsonLd={breadcrumbSchema([
+          { name: "Главная", url: "/" },
+          { name: "Обратная связь", url: "/feedback" },
+        ])}
+      />
       <h1 className="text-3xl font-bold text-center mb-2" style={{ color: "var(--text-primary)" }}>Обратная связь</h1>
       <p className="text-center mb-12" style={{ color: "var(--text-secondary)" }}>
         Есть вопрос или предложение? Напишите нам!

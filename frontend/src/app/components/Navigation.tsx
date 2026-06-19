@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Globe, ChevronDown, User, Heart, Bell, LogOut, Settings, LayoutDashboard, Home, Search, Info, MessageSquare, LogIn, Plus, Menu } from "lucide-react";
+import logotip from "@/assets/logo.png";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import {
@@ -50,9 +51,7 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRol
               onClick={() => onNavigate("landing")}
               className="flex items-center gap-2 flex-shrink-0"
             >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, var(--lake-blue), var(--turquoise))" }}>
-                <span className="text-white text-sm font-bold">IK</span>
-              </div>
+              <img src={logotip} alt="IssykRelax" className="h-8 w-auto" />
               <span className="font-bold text-lg" style={{ color: "var(--lake-blue)", fontFamily: "var(--font-display)" }}>
                 IssykRelax
               </span>

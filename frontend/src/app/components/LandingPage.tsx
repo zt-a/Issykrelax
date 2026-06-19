@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { Search, MapPin, Calendar, Users, Star, ArrowRight, CheckCircle, ChevronLeft, ChevronRight, Waves, Tent, Hotel, Coffee, BedDouble, Home } from "lucide-react";
+import logotip from "@/assets/logo.png";
+import { SEO } from "./SEO";
+import { localBusinessSchema, searchActionSchema } from "../lib/schemas";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ImgWithFallback } from "./ui/img-with-fallback";
@@ -75,6 +78,12 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      <SEO
+        title="Маркетплейс отдыха на Иссык-Куле"
+        description="IssykRelax — крупнейший маркетплейс отдыха на Иссык-Куле. Бронируйте жильё, отели, коттеджи, туры, рестораны. Лучшие цены, реальные отзывы, мгновенное бронирование."
+        canonical="/"
+        jsonLd={[localBusinessSchema(), searchActionSchema()]}
+      />
       {/* Hero */}
       <section className="relative min-h-[600px] flex items-center" style={{ background: "linear-gradient(135deg, #0a3a5c 0%, #1a6fa8 50%, #0cb8b6 100%)" }}>
         <div className="absolute inset-0 overflow-hidden">
@@ -316,9 +325,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, var(--lake-blue), var(--turquoise))" }}>
-                <span className="text-white text-sm font-bold">IK</span>
-              </div>
+              <img src={logotip} alt="IssykRelax" className="h-8 w-auto" />
               <span className="font-bold text-lg" style={{ color: "var(--lake-blue)", fontFamily: "var(--font-display)" }}>IssykRelax</span>
             </div>
             <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>Крупнейший маркетплейс для отдыха на Иссык-Куле. Находите жильё, рестораны, туры и транспорт.</p>

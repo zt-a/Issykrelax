@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { CheckCircle, Upload, X, ChevronLeft, ChevronRight, Info, Image, Tag, DollarSign, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { Helmet } from "react-helmet-async";
 import { getCategories, getCities, createProperty } from "../services/properties";
 import type { CategoryResponse, CityResponse } from "../types/api";
 
@@ -142,6 +143,10 @@ export function AddListingWizard({ onNavigate }: AddListingWizardProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--surface)" }}>
+      <Helmet>
+        <title>Добавить объект | IssykRelax</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="max-w-3xl mx-auto px-4 py-8">
         <button onClick={() => onNavigate("owner-dashboard")} className="flex items-center gap-1 text-sm mb-6 hover:underline" style={{ color: "var(--lake-blue)" }}>
           <ChevronLeft size={15} /> Назад

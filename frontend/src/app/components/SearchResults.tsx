@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { MapPin, Heart, SlidersHorizontal, Grid3X3, Map, Wifi, Car, Waves, Dog, Baby, CheckCircle, X, Users, Bed, Bath, Star } from "lucide-react";
 import { toast } from "sonner";
+import { SEO } from "./SEO";
+import { breadcrumbSchema } from "../lib/schemas";
 import { Button } from "./ui/button";
 import { Slider } from "./ui/slider";
 import { ImgWithFallback } from "./ui/img-with-fallback";
@@ -196,6 +198,15 @@ export function SearchResults({ onNavigate, params }: SearchResultsProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      <SEO
+        title="Поиск жилья на Иссык-Куле"
+        description="Найдите идеальное жильё на Иссык-Куле: отели, коттеджи, юрты, гостевые дома. Сравните цены, читайте отзывы, бронируйте онлайн."
+        canonical="/search"
+        jsonLd={breadcrumbSchema([
+          { name: "Главная", url: "/" },
+          { name: "Поиск жилья", url: "/search" },
+        ])}
+      />
       <div className="border-b py-4 px-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
         <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl border bg-white text-sm flex-1 min-w-0" style={{ borderColor: "var(--border)" }}>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { User, Calendar, MapPin, CheckCircle, Clock, X, Save, Instagram, Send, Phone, Lock, Users, Bed, Bath, Home, Heart, Star, Settings, LayoutDashboard, Shield, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "../context/AuthContext";
 import { getMyBookings, cancelBooking, confirmGuestCheckIn } from "../services/bookings";
 import { getProperty } from "../services/properties";
@@ -623,6 +624,10 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--surface)" }}>
+      <Helmet>
+        <title>Личный кабинет | IssykRelax</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="rounded-2xl p-6 mb-6 border" style={{ background: "linear-gradient(135deg, var(--lake-blue-dark), var(--lake-blue))", borderColor: "transparent" }}>
           <div className="flex items-center gap-4">

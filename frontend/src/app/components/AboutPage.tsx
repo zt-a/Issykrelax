@@ -1,4 +1,6 @@
 import { Heart, Shield, Users, Globe } from "lucide-react";
+import { SEO } from "./SEO";
+import { breadcrumbSchema } from "../lib/schemas";
 
 interface AboutPageProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
@@ -14,6 +16,15 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <SEO
+        title="О нас"
+        description="IssykRelax — крупнейший маркетплейс отдыха на Иссык-Куле. Узнайте, как мы помогаем путешественникам находить лучшие варианты и бронировать онлайн."
+        canonical="/about"
+        jsonLd={breadcrumbSchema([
+          { name: "Главная", url: "/" },
+          { name: "О нас", url: "/about" },
+        ])}
+      />
       <h1 className="text-3xl font-bold text-center mb-2" style={{ color: "var(--text-primary)" }}>О нас</h1>
       <p className="text-center mb-12" style={{ color: "var(--text-secondary)" }}>
         IssykRelax — это ваш проводник в мир отдыха на озере Иссык-Куль

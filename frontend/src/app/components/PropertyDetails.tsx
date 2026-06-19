@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Star, MapPin, ChevronLeft, CheckCircle, Users, Bed, Bath, Calendar, Instagram, MessageCircle, Phone, Heart } from "lucide-react";
 import { toast } from "sonner";
+import { SEO } from "./SEO";
+import { vacationRentalSchema, breadcrumbSchema } from "../lib/schemas";
 import { Button } from "./ui/button";
 import { ImgWithFallback } from "./ui/img-with-fallback";
 import { getProperty } from "../services/properties";
@@ -139,6 +141,28 @@ export function PropertyDetails({ onNavigate, propertyId }: PropertyDetailsProps
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      <SEO
+        title={property.title}
+        description={`${property.title} — ${property.city?.name || "Иссык-Куль"}. ${property.price_per_night} сом/ночь. ${property.description?.slice(0, 150) || "Забронируйте жильё на Иссык-Куле."}`}
+        canonical={`/property/${property.id}`}
+        image={property.images?.[0]}
+        jsonLd={[
+          vacationRentalSchema({
+            id: property.id,
+            title: property.title,
+            description: property.description || `${property.title} на Иссык-Куле`,
+            image: property.images?.[0],
+            price: property.price_per_night,
+            city: property.city?.name,
+            rating: avgRating ? parseFloat(avgRating) : undefined,
+          }),
+          breadcrumbSchema([
+            { name: "Главная", url: "/" },
+            { name: "Поиск жилья", url: "/search" },
+            { name: property.title, url: `/property/${property.id}` },
+          ]),
+        ]}
+      />
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-start justify-between mb-4">
           <div>

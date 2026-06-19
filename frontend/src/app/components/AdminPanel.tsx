@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Users, Home, DollarSign, Shield, TrendingUp, AlertCircle, CheckCircle, Search } from "lucide-react";
 import { toast } from "sonner";
+import { Helmet } from "react-helmet-async";
 import { getAdminStats, getAdminOwners, getAdminProperties, getAdminBookings, approveOwner, approveProperty } from "../services/admin";
 import type { AdminStatsResponse, AdminOwnerResponse, AdminPropertyResponse, AdminBookingResponse } from "../types/api";
 import { AdminBookingDetailModal, AdminPropertyDetailModal, AdminOwnerDetailModal } from "./AdminDetailModals";
@@ -99,6 +100,10 @@ export function AdminPanel({ onNavigate }: AdminPanelProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--surface)" }}>
+      <Helmet>
+        <title>Панель администратора | IssykRelax</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, Calendar, Eye, Star, Plus, DollarSign, X } from "lucide-react";
 import { toast } from "sonner";
+import { Helmet } from "react-helmet-async";
 import { getOwnerProperties, getOwnerBookings, getOwnerWallet, checkInBooking, cancelOwnerBooking } from "../services/owner";
 import type { PropertyResponse, BookingResponse, WalletResponse } from "../types/api";
 import {
@@ -222,6 +223,10 @@ export function OwnerDashboard({ onNavigate }: OwnerDashboardProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--surface)" }}>
+      <Helmet>
+        <title>Панель владельца | IssykRelax</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>

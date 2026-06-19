@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Star, MapPin, Clock, Phone, Heart, Search, Utensils, Fish, Beef, Leaf, Coffee, ChevronDown } from "lucide-react";
+import { SEO } from "./SEO";
+import { breadcrumbSchema } from "../lib/schemas";
 
 interface RestaurantsPageProps {
   onNavigate: (page: string) => void;
@@ -37,6 +39,15 @@ export function RestaurantsPage({ onNavigate }: RestaurantsPageProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      <SEO
+        title="Рестораны Иссык-Куля"
+        description="Лучшие рестораны, кафе и столовые на Иссык-Куле. Кыргызская, средиземноморская, восточная кухня. Бронируйте столики онлайн."
+        canonical="/restaurants"
+        jsonLd={breadcrumbSchema([
+          { name: "Главная", url: "/" },
+          { name: "Рестораны", url: "/restaurants" },
+        ])}
+      />
       {/* Header */}
       <div className="py-10 px-4" style={{ background: "linear-gradient(135deg, var(--lake-blue-dark) 0%, var(--lake-blue) 100%)" }}>
         <div className="max-w-7xl mx-auto text-center text-white">
