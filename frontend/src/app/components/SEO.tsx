@@ -9,7 +9,7 @@ interface SEOProps {
 }
 
 const SITE_NAME = "IssykRelax";
-const BASE_URL = "https://issykrelax.com";
+const BASE_URL = "https://issykrelax.kg";
 const DEFAULT_IMAGE = "/logo.png";
 
 export function SEO({ title, description, canonical, image, jsonLd }: SEOProps) {

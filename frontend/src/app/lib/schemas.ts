@@ -1,4 +1,4 @@
-const BASE_URL = "https://issykrelax.com";
+const BASE_URL = "https://issykrelax.kg";
 
 export function localBusinessSchema() {
   return {
