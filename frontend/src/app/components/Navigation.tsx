@@ -26,7 +26,6 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout, hasRole } = useAuth();
-  const navRef = useRef<HTMLDivElement>(null);
   const onNavigateRef = useRef(onNavigate);
   onNavigateRef.current = onNavigate;
 
@@ -35,15 +34,12 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   }, []);
 
   useEffect(() => {
-    const el = navRef.current;
-    if (!el) return;
-
     const handler = (e: MouseEvent) => {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 
       const link = (e.target as HTMLElement).closest("a");
       if (!link) return;
-      if (!el.contains(link)) return;
+      if (!link.closest("nav")) return;
 
       const href = link.getAttribute("href");
       if (!href || href.startsWith("http") || href.startsWith("//") || href.startsWith("#") || href.startsWith("tel:") || href.startsWith("mailto:")) return;
@@ -51,6 +47,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       if (link.getAttribute("download") != null) return;
 
       e.preventDefault();
+      e.stopPropagation();
 
       const pathname = href.startsWith("/") ? href : `/${href}`;
       const page = getCurrentPage(pathname);
@@ -77,8 +74,8 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       onNavigateRef.current(page, params);
     };
 
-    el.addEventListener("click", handler, false);
-    return () => el.removeEventListener("click", handler, false);
+    document.addEventListener("click", handler, true);
+    return () => document.removeEventListener("click", handler, true);
   }, []);
 
   const navLinks = [
@@ -117,7 +114,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   };
 
   return (
-    <div ref={navRef}>
+    <>
       {/* Desktop Header */}
       <nav style={{ background: "var(--background)", borderBottom: "1px solid var(--border)" }} className="hidden md:block sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -351,6 +348,6 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
           <Plus size={24} />
         </a>
       )}
-    </div>
+    </>
   );
 }
