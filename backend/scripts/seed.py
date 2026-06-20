@@ -145,9 +145,9 @@ async def seed() -> None:
 
         wallet = WalletModel(
             id=uuid.uuid4(),
-            owner_id=owner.id,
-            available_balance=0,
-            pending_balance=0,
+            user_id=owner.id,
+            main_balance=0,
+            revenue_balance=0,
         )
         session.add(wallet)
 

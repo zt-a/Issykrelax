@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Navigation } from "./components/Navigation";
 import { LandingPage } from "./components/LandingPage";
@@ -7,11 +7,13 @@ import { SearchResults } from "./components/SearchResults";
 import { PropertyDetails } from "./components/PropertyDetails";
 import { RestaurantsPage } from "./components/RestaurantsPage";
 import { ToursPage } from "./components/ToursPage";
+import { ActivitiesPage } from "./components/ActivitiesPage";
+import { TransfersPage } from "./components/TransfersPage";
+import { TourPackagesPage } from "./components/TourPackagesPage";
 import { UserDashboard } from "./components/UserDashboard";
 import { OwnerDashboard } from "./components/OwnerDashboard";
 import { AddListingWizard } from "./components/AddListingWizard";
 import { PricingPage } from "./components/PricingPage";
-import { AdminPanel } from "./components/AdminPanel";
 import { AboutPage } from "./components/AboutPage";
 import { FeedbackPage } from "./components/FeedbackPage";
 import { CityPage } from "./components/CityPage";
@@ -21,7 +23,22 @@ import { RegisterPage } from "./components/RegisterPage";
 import { PrivacyPage } from "./components/PrivacyPage";
 import { TermsPage } from "./components/TermsPage";
 import { FaqPage } from "./components/FaqPage";
+import { ActivityDetailPage } from "./components/ActivityDetailPage";
+import { TransferDetailPage } from "./components/TransferDetailPage";
+import { TourDetailPage } from "./components/TourDetailPage";
+import { TourPackageDetailPage } from "./components/TourPackageDetailPage";
+import { RestaurantDetailPage } from "./components/RestaurantDetailPage";
 import { Toaster } from "./components/ui/sonner";
+
+const AdminPanel = lazy(() => import("./components/AdminPanel").then((m) => ({ default: m.AdminPanel })));
+const ModeratorDashboard = lazy(() => import("./components/ModeratorDashboard").then((m) => ({ default: m.ModeratorDashboard })));
+const DriverDashboard = lazy(() => import("./components/DriverDashboard").then((m) => ({ default: m.DriverDashboard })));
+const GuideDashboard = lazy(() => import("./components/GuideDashboard").then((m) => ({ default: m.GuideDashboard })));
+const ActivityProviderDashboard = lazy(() => import("./components/ActivityProviderDashboard").then((m) => ({ default: m.ActivityProviderDashboard })));
+const RestaurantDashboard = lazy(() => import("./components/RestaurantDashboard").then((m) => ({ default: m.RestaurantDashboard })));
+const AgencyDashboard = lazy(() => import("./components/AgencyDashboard").then((m) => ({ default: m.AgencyDashboard })));
+const ConciergeDashboard = lazy(() => import("./components/ConciergeDashboard").then((m) => ({ default: m.ConciergeDashboard })));
+const TranslatorDashboard = lazy(() => import("./components/TranslatorDashboard").then((m) => ({ default: m.TranslatorDashboard })));
 
 export type Page =
   | "landing"
@@ -31,6 +48,14 @@ export type Page =
   | "tours"
   | "dashboard"
   | "owner-dashboard"
+  | "driver-dashboard"
+  | "guide-dashboard"
+  | "activity-dashboard"
+  | "restaurant-dashboard"
+  | "agency-dashboard"
+  | "concierge-dashboard"
+  | "translator-dashboard"
+  | "moderator"
   | "add-listing"
   | "pricing"
   | "admin"
@@ -42,7 +67,15 @@ export type Page =
   | "register"
   | "privacy"
   | "terms"
-  | "faq";
+  | "faq"
+  | "activities"
+  | "transfers"
+  | "tour-packages"
+  | "activity"
+  | "transfer"
+  | "tour"
+  | "tour-package"
+  | "restaurant";
 
 export interface NavParams {
   property_id?: string;
@@ -55,6 +88,11 @@ export interface NavParams {
   check_out?: string;
   guests?: string;
   offset?: string;
+  activity_id?: string;
+  transfer_id?: string;
+  tour_id?: string;
+  pkg_id?: string;
+  restaurant_id?: string;
 }
 
 function parseURL(): { page: Page; params: NavParams } {
@@ -75,9 +113,32 @@ function parseURL(): { page: Page; params: NavParams } {
     const slug = path.split("/")[2];
     return { page: "category", params: { category_slug: slug } };
   }
+  if (path.startsWith("/activity/")) {
+    return { page: "activity", params: { activity_id: path.split("/")[2] } };
+  }
+  if (path.startsWith("/transfer/")) {
+    return { page: "transfer", params: { transfer_id: path.split("/")[2] } };
+  }
+  if (path.startsWith("/tour/")) {
+    return { page: "tour", params: { tour_id: path.split("/")[2] } };
+  }
+  if (path.startsWith("/tour-package/")) {
+    return { page: "tour-package", params: { pkg_id: path.split("/")[2] } };
+  }
+  if (path.startsWith("/restaurant/")) {
+    return { page: "restaurant", params: { restaurant_id: path.split("/")[2] } };
+  }
   switch (path) {
     case "/dashboard": return { page: "dashboard", params: {} };
     case "/owner-dashboard": return { page: "owner-dashboard", params: {} };
+    case "/driver-dashboard": return { page: "driver-dashboard", params: {} };
+    case "/guide-dashboard": return { page: "guide-dashboard", params: {} };
+    case "/activity-dashboard": return { page: "activity-dashboard", params: {} };
+    case "/restaurant-dashboard": return { page: "restaurant-dashboard", params: {} };
+    case "/agency-dashboard": return { page: "agency-dashboard", params: {} };
+    case "/concierge-dashboard": return { page: "concierge-dashboard", params: {} };
+    case "/translator-dashboard": return { page: "translator-dashboard", params: {} };
+    case "/moderator": return { page: "moderator", params: {} };
     case "/add-listing": return { page: "add-listing", params: {} };
     case "/admin": return { page: "admin", params: {} };
     case "/restaurants": return { page: "restaurants", params: {} };
@@ -90,6 +151,9 @@ function parseURL(): { page: Page; params: NavParams } {
     case "/privacy": return { page: "privacy", params: {} };
     case "/terms": return { page: "terms", params: {} };
     case "/faq": return { page: "faq", params: {} };
+    case "/activities": return { page: "activities", params: {} };
+    case "/transfers": return { page: "transfers", params: {} };
+    case "/tour-packages": return { page: "tour-packages", params: {} };
     default: return { page: "landing", params: {} };
   }
 }
@@ -112,6 +176,16 @@ function AppContent() {
       path = `/city/${extra.city_slug}`;
     } else if (page === "category" && extra?.category_slug) {
       path = `/category/${extra.category_slug}`;
+    } else if (page === "activity" && extra?.activity_id) {
+      path = `/activity/${extra.activity_id}`;
+    } else if (page === "transfer" && extra?.transfer_id) {
+      path = `/transfer/${extra.transfer_id}`;
+    } else if (page === "tour" && extra?.tour_id) {
+      path = `/tour/${extra.tour_id}`;
+    } else if (page === "tour-package" && extra?.pkg_id) {
+      path = `/tour-package/${extra.pkg_id}`;
+    } else if (page === "restaurant" && extra?.restaurant_id) {
+      path = `/restaurant/${extra.restaurant_id}`;
     } else if (page === "search") {
       const sp = new URLSearchParams();
       if (extra) {
@@ -131,8 +205,6 @@ function AppContent() {
   const noNavPages: Page[] = ["add-listing"];
   const showNav = !noNavPages.includes(currentPage);
 
-  const userRole = user?.role === "admin" ? "admin" : user?.role === "owner" ? "owner" : "tourist";
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--background)" }}>
@@ -149,12 +221,12 @@ function AppContent() {
           currentPage={currentPage}
           onNavigate={navigate}
           isLoggedIn={!!user}
-          userRole={userRole}
         />
       )}
 
       <Toaster position="top-right" richColors />
       <main className="pb-16 md:pb-0">
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: "var(--lake-blue)" }} /></div>}>
         {currentPage === "landing" && <LandingPage onNavigate={navigate} />}
         {currentPage === "search" && <SearchResults onNavigate={navigate} params={navParams} />}
         {currentPage === "property" && <PropertyDetails onNavigate={navigate} propertyId={navParams.property_id} />}
@@ -162,6 +234,14 @@ function AppContent() {
         {currentPage === "tours" && <ToursPage onNavigate={navigate} />}
         {currentPage === "dashboard" && <UserDashboard onNavigate={navigate} />}
         {currentPage === "owner-dashboard" && <OwnerDashboard onNavigate={navigate} />}
+        {currentPage === "driver-dashboard" && <DriverDashboard onNavigate={navigate} />}
+        {currentPage === "guide-dashboard" && <GuideDashboard onNavigate={navigate} />}
+        {currentPage === "activity-dashboard" && <ActivityProviderDashboard onNavigate={navigate} />}
+        {currentPage === "restaurant-dashboard" && <RestaurantDashboard onNavigate={navigate} />}
+        {currentPage === "agency-dashboard" && <AgencyDashboard onNavigate={navigate} />}
+        {currentPage === "concierge-dashboard" && <ConciergeDashboard onNavigate={navigate} />}
+        {currentPage === "translator-dashboard" && <TranslatorDashboard onNavigate={navigate} />}
+        {currentPage === "moderator" && <ModeratorDashboard onNavigate={navigate} />}
         {currentPage === "add-listing" && <AddListingWizard onNavigate={navigate} />}
         {currentPage === "pricing" && <PricingPage onNavigate={navigate} />}
         {currentPage === "admin" && <AdminPanel onNavigate={navigate} />}
@@ -174,6 +254,15 @@ function AppContent() {
         {currentPage === "privacy" && <PrivacyPage onNavigate={navigate} />}
         {currentPage === "terms" && <TermsPage onNavigate={navigate} />}
         {currentPage === "faq" && <FaqPage onNavigate={navigate} />}
+        {currentPage === "activities" && <ActivitiesPage onNavigate={navigate} />}
+        {currentPage === "transfers" && <TransfersPage onNavigate={navigate} />}
+        {currentPage === "tour-packages" && <TourPackagesPage onNavigate={navigate} />}
+        {currentPage === "activity" && <ActivityDetailPage onNavigate={navigate} activityId={navParams.activity_id} />}
+        {currentPage === "transfer" && <TransferDetailPage onNavigate={navigate} transferId={navParams.transfer_id} />}
+        {currentPage === "tour" && <TourDetailPage onNavigate={navigate} tourId={navParams.tour_id} />}
+        {currentPage === "tour-package" && <TourPackageDetailPage onNavigate={navigate} pkgId={navParams.pkg_id} />}
+        {currentPage === "restaurant" && <RestaurantDetailPage onNavigate={navigate} restaurantId={navParams.restaurant_id} />}
+        </Suspense>
       </main>
     </div>
   );

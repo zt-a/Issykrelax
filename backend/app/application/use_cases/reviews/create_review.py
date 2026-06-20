@@ -3,6 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from app.application.dto.review_dto import CreateReviewRequest, ReviewResponse
+from app.domain.entities.booking import BookingStatus
 from app.domain.entities.review import Review
 from app.domain.interfaces.repositories.booking_repository import BookingRepository
 from app.domain.interfaces.repositories.property_repository import PropertyRepository
@@ -30,7 +31,7 @@ class CreateReviewUseCase:
         if booking.guest_id != user_id:
             raise PermissionError("You can only review your own bookings")
 
-        if booking.status != "checked_in":
+        if booking.status != BookingStatus.CHECKED_IN:
             raise ValueError("Can only review completed (checked-in) bookings")
 
         existing = await self._review_repo.get_by_booking(UUID(request.booking_id))

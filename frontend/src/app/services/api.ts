@@ -1,5 +1,15 @@
 const API_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
+export function buildQueryString(params?: Record<string, unknown>): string {
+  if (!params) return "";
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null) search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
+
 function getToken(): string | null {
   return localStorage.getItem("access_token");
 }

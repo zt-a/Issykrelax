@@ -77,11 +77,13 @@ export interface PropertyListResponse {
 
 export interface BookingResponse {
   id: string;
-  property_id: string;
+  service_type: string;
+  service_id: string | null;
+  property_id: string | null;
   guest_id: string;
   owner_id: string;
-  check_in: string;
-  check_out: string;
+  check_in: string | null;
+  check_out: string | null;
   total_price: number;
   status: string;
   guest_count: number;
@@ -130,6 +132,210 @@ export interface TransactionResponse {
   created_at: string;
 }
 
+export interface NewWalletResponse {
+  id: string;
+  user_id: string;
+  main_balance: number;
+  revenue_balance: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WalletTransactionResponse {
+  id: string;
+  wallet_id: string;
+  booking_id: string | null;
+  amount: number;
+  type: string;
+  status: string;
+  note: string | null;
+  created_at: string;
+}
+
+export interface WalletTransactionListResponse {
+  items: WalletTransactionResponse[];
+  total: number;
+}
+
+// --- Driver ---
+export interface DriverProfileResponse {
+  id: string;
+  user_id: string;
+  bio: string | null;
+  license_number: string | null;
+  vehicle_info: string | null;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TransferResponse {
+  id: string;
+  driver_id: string;
+  title: string;
+  description: string | null;
+  from_location: string;
+  to_location: string;
+  price: number;
+  currency: string;
+  max_passengers: number;
+  vehicle_type: string | null;
+  duration_minutes: number | null;
+  status: string;
+  is_active: boolean;
+  city_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TransferListResponse {
+  items: TransferResponse[];
+  total: number;
+}
+
+export interface DriverDashboardResponse {
+  profile: {
+    id: string;
+    bio: string | null;
+    license_number: string | null;
+    vehicle_info: string | null;
+    is_approved: boolean;
+  } | null;
+  transfers_count: number;
+  active_transfers: number;
+  transfers: TransferResponse[];
+}
+
+// --- Guide ---
+export interface GuideProfileResponse {
+  id: string;
+  user_id: string;
+  bio: string | null;
+  languages: string | null;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TourResponse {
+  id: string;
+  guide_id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  duration_days: number;
+  max_guests: number;
+  includes: string | null;
+  meeting_point: string | null;
+  city_id: string | null;
+  status: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TourListResponse {
+  items: TourResponse[];
+  total: number;
+}
+
+// --- Activity Provider ---
+export interface ActivityProviderProfileResponse {
+  id: string;
+  user_id: string;
+  company_name: string | null;
+  bio: string | null;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActivityResponse {
+  id: string;
+  provider_id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  max_participants: number;
+  duration_minutes: number;
+  location: string | null;
+  city_id: string | null;
+  status: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActivityListResponse {
+  items: ActivityResponse[];
+  total: number;
+}
+
+// --- Restaurant Partner ---
+export interface RestaurantPartnerProfileResponse {
+  id: string;
+  user_id: string;
+  restaurant_name: string | null;
+  description: string | null;
+  cuisine_type: string | null;
+  address: string | null;
+  phone: string | null;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RestaurantResponse {
+  id: string;
+  partner_id: string;
+  name: string;
+  description: string | null;
+  cuisine_type: string | null;
+  address: string | null;
+  phone: string | null;
+  price_range: string | null;
+  opening_hours: string | null;
+  city_id: string | null;
+  status: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RestaurantListResponse {
+  items: RestaurantResponse[];
+  total: number;
+}
+
+// --- Moderation ---
+export interface ModerationQueueItem {
+  id: string;
+  service_type: string;
+  title: string;
+  status: string;
+  created_at: string;
+  user_id: string | null;
+}
+
+export interface ModerationQueueResponse {
+  items: ModerationQueueItem[];
+  total: number;
+}
+
+export interface RoleResponse {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+}
+
+export interface ListRolesResponse {
+  items: RoleResponse[];
+}
+
+// --- Admin ---
 export interface AdminOwnerResponse {
   id: string;
   email: string;
@@ -275,4 +481,95 @@ export interface AdminStatsResponse {
   total_properties: number;
   total_bookings: number;
   total_revenue: number;
+  role_counts: AdminStatsRoleCount[];
+}
+
+export interface WithdrawalResponse {
+  id: string;
+  wallet_id: string;
+  amount: number;
+  type: string;
+  status: string;
+  note: string | null;
+  created_at: string;
+}
+
+export interface WithdrawalListResponse {
+  items: WithdrawalResponse[];
+  total: number;
+}
+
+// --- Agency ---
+export interface AgencyProfileResponse {
+  id: string;
+  user_id: string;
+  company_name: string;
+  description: string | null;
+  license_number: string | null;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TourPackageResponse {
+  id: string;
+  agency_id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  duration_days: number;
+  max_guests: number;
+  includes: string | null;
+  itinerary: Record<string, unknown> | null;
+  status: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TourPackageListResponse {
+  items: TourPackageResponse[];
+  total: number;
+}
+
+export interface AgencyDashboardResponse {
+  profile: {
+    id: string;
+    company_name: string;
+    description: string | null;
+    license_number: string | null;
+    is_approved: boolean;
+  } | null;
+  packages_count: number;
+  active_packages: number;
+  packages: TourPackageResponse[];
+}
+
+// --- Concierge ---
+export interface ConciergeProfileResponse {
+  id: string;
+  user_id: string;
+  bio: string | null;
+  service_areas: string | null;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// --- Translator ---
+export interface TranslatorProfileResponse {
+  id: string;
+  user_id: string;
+  bio: string | null;
+  languages: string | null;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminStatsRoleCount {
+  slug: string;
+  name: string;
+  count: number;
 }

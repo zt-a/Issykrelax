@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Calendar, MapPin, CheckCircle, Clock, X, Save, Instagram, Send, Phone, Lock, Users, Bed, Bath, Home, Heart, Star, Settings, LayoutDashboard, Shield, ExternalLink } from "lucide-react";
+import { User, Calendar, MapPin, CheckCircle, Clock, X, Save, Instagram, Send, Phone, Lock, Users, Bed, Bath, Home, Heart, Star, Settings, LayoutDashboard, Shield, ExternalLink, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "../context/AuthContext";
@@ -7,6 +7,7 @@ import { getMyBookings, cancelBooking, confirmGuestCheckIn } from "../services/b
 import { getProperty } from "../services/properties";
 import { getFavoriteProperties } from "../services/favorites";
 import { updateProfile, changePassword } from "../services/api";
+import { BOOKING_STATUS_CONFIG } from "../lib/booking-status";
 import type { BookingResponse, PropertyResponse } from "../types/api";
 import {
   AlertDialog,
@@ -19,23 +20,18 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { ImgWithFallback } from "./ui/img-with-fallback";
+import { WalletSection } from "./WalletSection";
 
 interface UserDashboardProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  paid: { label: "Подтверждено", color: "var(--turquoise)", bg: "var(--turquoise-light)" },
-  confirmed: { label: "Подтверждено", color: "var(--turquoise)", bg: "var(--turquoise-light)" },
-  pending: { label: "Ожидает", color: "var(--sand)", bg: "var(--sand-light)" },
-  checked_in: { label: "Активно", color: "var(--lake-blue)", bg: "var(--lake-blue-light)" },
-  cancelled: { label: "Отменено", color: "#ef4444", bg: "#fee2e2" },
-  completed: { label: "Завершено", color: "var(--text-secondary)", bg: "var(--surface)" },
-};
+const STATUS_CONFIG = BOOKING_STATUS_CONFIG;
 
 const TABS = [
   { id: "bookings", label: "Бронирования", icon: Calendar },
   { id: "favorites", label: "Избранное", icon: Heart },
+  { id: "wallet", label: "Кошелёк", icon: Wallet },
   { id: "profile", label: "Профиль", icon: User },
 ];
 
@@ -728,6 +724,8 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
         {activeTab === "favorites" && (
           <FavoritesSection onNavigate={onNavigate} />
         )}
+
+        {activeTab === "wallet" && <WalletSection />}
 
         {activeTab === "profile" && (
           <>

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from decimal import Decimal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.booking_dto import (
@@ -13,10 +11,9 @@ from app.application.dto.booking_dto import (
     CreateBookingRequest,
 )
 from app.application.use_cases.bookings.cancel_booking import CancelBookingUseCase
-from app.application.use_cases.bookings.confirm_check_in import GuestCheckInUseCase
-from app.application.use_cases.bookings.create_booking import CreateBookingUseCase
+from app.application.use_cases.bookings.confirm_dual import GuestConfirmUseCase, ProviderConfirmUseCase
+from app.application.use_cases.bookings.create_service_booking import CreateServiceBookingUseCase
 from app.core.database import get_db
-from app.infrastructure.database.models.property import PropertyModel
 from app.infrastructure.database.repositories.booking_repository import SQLAlchemyBookingRepository
 from app.infrastructure.database.repositories.property_repository import SQLAlchemyPropertyRepository
 from app.infrastructure.database.repositories.wallet_repository import SQLAlchemyWalletRepository
@@ -31,22 +28,13 @@ async def create_booking(
     user_id: UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_db),
 ) -> BookingResponse:
-    property_result = await session.execute(
-        select(PropertyModel).where(PropertyModel.id == UUID(request.property_id))
-    )
-    property = property_result.scalar_one_or_none()
-    if not property:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
-
-    nights = max(1, (request.check_out - request.check_in).days)
-    total_price = Decimal(str(property.price_per_night)) * Decimal(nights)
-
     booking_repo = SQLAlchemyBookingRepository(session)
     wallet_repo = SQLAlchemyWalletRepository(session)
+    property_repo = SQLAlchemyPropertyRepository(session)
 
-    use_case = CreateBookingUseCase(booking_repo, wallet_repo)
+    use_case = CreateServiceBookingUseCase(booking_repo, wallet_repo, property_repo)
     try:
-        return await use_case.execute(request, user_id, property.owner_id, total_price)
+        return await use_case.execute(request, user_id)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
@@ -64,11 +52,13 @@ async def get_my_bookings(
         items=[
             BookingResponse(
                 id=str(b.id),
-                property_id=str(b.property_id),
+                service_type=b.service_type,
+                service_id=str(b.service_id) if b.service_id else None,
+                property_id=str(b.property_id) if b.property_id else None,
                 guest_id=str(b.guest_id),
                 owner_id=str(b.owner_id),
-                check_in=b.check_in.isoformat(),
-                check_out=b.check_out.isoformat(),
+                check_in=b.check_in.isoformat() if b.check_in else None,
+                check_out=b.check_out.isoformat() if b.check_out else None,
                 total_price=float(b.total_price),
                 status=b.status,
                 guest_count=b.guest_count,
@@ -103,16 +93,32 @@ async def cancel_booking(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.post("/{booking_id}/confirm-check-in", response_model=BookingResponse)
-async def confirm_check_in(
+@router.post("/{booking_id}/confirm-guest", response_model=BookingResponse)
+async def confirm_guest(
     booking_id: UUID,
     user_id: UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_db),
 ) -> BookingResponse:
     booking_repo = SQLAlchemyBookingRepository(session)
     wallet_repo = SQLAlchemyWalletRepository(session)
-    property_repo = SQLAlchemyPropertyRepository(session)
-    use_case = GuestCheckInUseCase(booking_repo, wallet_repo, property_repo)
+    use_case = GuestConfirmUseCase(booking_repo, wallet_repo)
+    try:
+        return await use_case.execute(booking_id, user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+
+@router.post("/{booking_id}/confirm-provider", response_model=BookingResponse)
+async def confirm_provider(
+    booking_id: UUID,
+    user_id: UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_db),
+) -> BookingResponse:
+    booking_repo = SQLAlchemyBookingRepository(session)
+    wallet_repo = SQLAlchemyWalletRepository(session)
+    use_case = ProviderConfirmUseCase(booking_repo, wallet_repo)
     try:
         return await use_case.execute(booking_id, user_id)
     except ValueError as e:

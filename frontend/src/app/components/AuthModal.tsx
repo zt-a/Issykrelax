@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Home, Car, Compass, Languages, User, Mountain, Utensils } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "./ui/button";
@@ -13,14 +13,24 @@ interface AuthModalProps {
   onSuccess: () => void;
 }
 
+const ROLES = [
+  { slug: "tourist", label: "Турист", icon: User },
+  { slug: "owner", label: "Владелец", icon: Home },
+  { slug: "driver", label: "Водитель", icon: Car },
+  { slug: "guide", label: "Гид", icon: Compass },
+  { slug: "translator", label: "Переводчик", icon: Languages },
+  { slug: "activity_provider", label: "Аниматор", icon: Mountain },
+  { slug: "restaurant_partner", label: "Ресторан", icon: Utensils },
+];
+
 export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: AuthModalProps) {
-  const { login, registerUser, registerOwner } = useAuth();
+  const { login, registerUser, registerOwner, registerProvider } = useAuth();
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [businessPhone, setBusinessPhone] = useState("");
-  const [isOwner, setIsOwner] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
@@ -34,6 +44,8 @@ export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: Auth
     if (password.length < 6) errs.password = "Минимум 6 символов";
     if (mode === "register") {
       if (!fullName.trim()) errs.fullName = "Введите имя";
+      if (!selectedRole) errs.role = "Выберите роль";
+      if (selectedRole === "owner" && !businessPhone.trim()) errs.businessPhone = "Введите телефон для бизнеса";
     }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -48,11 +60,14 @@ export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: Auth
       if (mode === "login") {
         await login(email, password);
         toast.success("Добро пожаловать!");
-      } else if (isOwner) {
+      } else if (selectedRole === "tourist") {
+        await registerUser({ email, password, full_name: fullName, phone });
+        toast.success("Регистрация прошла успешно");
+      } else if (selectedRole === "owner") {
         await registerOwner({ email, password, full_name: fullName, phone, business_phone: businessPhone });
         toast.success("Регистрация владельца прошла успешно");
       } else {
-        await registerUser({ email, password, full_name: fullName, phone });
+        await registerProvider({ email, password, full_name: fullName, phone, role_slug: selectedRole! });
         toast.success("Регистрация прошла успешно");
       }
       onSuccess();
@@ -63,6 +78,17 @@ export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: Auth
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const resetForm = () => {
+    setSelectedRole(null);
+    setEmail("");
+    setPassword("");
+    setFullName("");
+    setPhone("");
+    setBusinessPhone("");
+    setError("");
+    setFieldErrors({});
   };
 
   return (
@@ -85,6 +111,32 @@ export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: Auth
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "register" && (
             <>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Кто вы?</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {ROLES.map((role) => {
+                    const Icon = role.icon;
+                    const selected = selectedRole === role.slug;
+                    return (
+                      <button
+                        key={role.slug}
+                        type="button"
+                        onClick={() => { setSelectedRole(role.slug); setFieldErrors((prev) => ({ ...prev, role: "" })); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all"
+                        style={{
+                          borderColor: selected ? "var(--lake-blue)" : "var(--border)",
+                          background: selected ? "var(--lake-blue-light)" : "white",
+                          color: selected ? "var(--lake-blue)" : "var(--text-secondary)",
+                        }}
+                      >
+                        <Icon size={14} />
+                        {role.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {fieldErrors.role && <p className="text-xs text-red-500 mt-1">{fieldErrors.role}</p>}
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-primary)" }}>Имя</label>
                 <input
@@ -140,37 +192,19 @@ export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: Auth
             {fieldErrors.password && <p className="text-xs text-red-500 mt-1">{fieldErrors.password}</p>}
           </div>
 
-          {mode === "register" && (
-            <>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isOwner"
-                  checked={isOwner}
-                  onChange={(e) => setIsOwner(e.target.checked)}
-                  className="rounded"
-                />
-                <label htmlFor="isOwner" className="text-sm" style={{ color: "var(--text-primary)" }}>
-                  Я владелец жилья
-                </label>
-              </div>
-              {isOwner && (
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-primary)" }}>
-                    Телефон для бизнеса
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={businessPhone}
-                    onChange={(e) => setBusinessPhone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border text-sm"
-                    style={{ borderColor: "var(--border)" }}
-                    placeholder="+996 XXX XXX XXX"
-                  />
-                </div>
-              )}
-            </>
+          {mode === "register" && selectedRole === "owner" && (
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-primary)" }}>Телефон для бизнеса</label>
+              <input
+                type="tel"
+                required
+                value={businessPhone}
+                onChange={(e) => setBusinessPhone(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border text-sm"
+                style={{ borderColor: "var(--border)" }}
+                placeholder="+996 XXX XXX XXX"
+              />
+            </div>
           )}
 
           {error && (
@@ -189,7 +223,7 @@ export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: Auth
 
         <p className="text-sm text-center mt-4" style={{ color: "var(--text-secondary)" }}>
           {mode === "login" ? "Нет аккаунта?" : "Уже есть аккаунт?"}{" "}
-          <button onClick={onSwitchMode} className="font-medium" style={{ color: "var(--lake-blue)" }}>
+          <button onClick={() => { onSwitchMode(); resetForm(); }} className="font-medium" style={{ color: "var(--lake-blue)" }}>
             {mode === "login" ? "Зарегистрироваться" : "Войти"}
           </button>
         </p>
@@ -209,8 +243,6 @@ export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: Auth
           onClose={() => setShowForgot(false)}
           onBack={() => setShowForgot(false)}
         />
-
-
       </div>
     </div>
   );

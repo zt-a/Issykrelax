@@ -1,4 +1,4 @@
-import { apiRequest } from "./api";
+import { apiRequest, buildQueryString } from "./api";
 import type { BookingResponse, BookingListResponse } from "../types/api";
 
 export async function createBooking(data: {
@@ -18,11 +18,7 @@ export async function getMyBookings(params?: {
   offset?: number;
   limit?: number;
 }): Promise<BookingListResponse> {
-  const search = new URLSearchParams();
-  if (params?.offset !== undefined) search.set("offset", String(params.offset));
-  if (params?.limit !== undefined) search.set("limit", String(params.limit));
-  const qs = search.toString();
-  return apiRequest<BookingListResponse>(`/bookings/my-bookings${qs ? `?${qs}` : ""}`);
+  return apiRequest<BookingListResponse>(`/bookings/my-bookings${buildQueryString(params)}`);
 }
 
 export async function cancelBooking(id: string): Promise<BookingResponse> {

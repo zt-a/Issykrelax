@@ -14,7 +14,13 @@ from app.application.dto.admin_dto import (
     AdminPropertyDetailResponse,
     AdminPropertyListResponse,
     AdminStatsResponse,
+    AssignRoleRequest,
+    AssignRoleResponse,
+    ListRolesResponse,
+    ModerationQueueResponse,
     RatingAdjustRequest,
+    WithdrawalListResponse,
+    WithdrawalResponse,
 )
 from app.application.use_cases.admin.adjust_rating import AdminAdjustRatingUseCase
 from app.application.use_cases.admin.approve_owner import ApproveOwnerUseCase
@@ -26,8 +32,16 @@ from app.application.use_cases.admin.get_stats import GetAdminStatsUseCase
 from app.application.use_cases.admin.list_bookings import AdminListBookingsUseCase
 from app.application.use_cases.admin.list_owners import ListOwnersUseCase
 from app.application.use_cases.admin.list_properties import AdminListPropertiesUseCase
+from app.application.use_cases.admin.moderation import ApproveEntityUseCase, ModerationQueueUseCase, RejectEntityUseCase
+from app.application.use_cases.admin.role_management import AssignUserRoleUseCase, ListRolesUseCase
+from app.application.use_cases.admin.withdrawal_management import (
+    AdminApproveWithdrawalUseCase,
+    AdminListWithdrawalsUseCase,
+    AdminRejectWithdrawalUseCase,
+)
 from app.core.database import get_db
 from app.infrastructure.database.repositories.property_repository import SQLAlchemyPropertyRepository
+from app.infrastructure.database.repositories.role_repository import SQLAlchemyRoleRepository
 from app.infrastructure.database.repositories.user_repository import SQLAlchemyUserRepository
 from app.presentation.api.deps import require_admin
 
@@ -78,7 +92,8 @@ async def approve_property(
     _: None = Depends(require_admin),
     session: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    use_case = ApprovePropertyUseCase(session)
+    property_repo = SQLAlchemyPropertyRepository(session)
+    use_case = ApprovePropertyUseCase(property_repo)
     try:
         return await use_case.execute(property_id)
     except ValueError as e:
@@ -156,5 +171,114 @@ async def get_owner_detail(
     use_case = AdminGetOwnerDetailUseCase(session)
     try:
         return await use_case.execute(owner_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+# --- Moderation ---
+
+
+@router.get("/moderation/queue", response_model=ModerationQueueResponse)
+async def moderation_queue(
+    _: None = Depends(require_admin),
+    session: AsyncSession = Depends(get_db),
+) -> ModerationQueueResponse:
+    use_case = ModerationQueueUseCase(session)
+    items = await use_case.execute()
+    return ModerationQueueResponse(items=items, total=len(items))
+
+
+@router.patch("/moderation/{service_type}/{entity_id}/approve")
+async def approve_entity(
+    service_type: str,
+    entity_id: UUID,
+    _: None = Depends(require_admin),
+    session: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    use_case = ApproveEntityUseCase(session)
+    try:
+        return await use_case.execute(service_type, entity_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.patch("/moderation/{service_type}/{entity_id}/reject")
+async def reject_entity(
+    service_type: str,
+    entity_id: UUID,
+    _: None = Depends(require_admin),
+    session: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    use_case = RejectEntityUseCase(session)
+    try:
+        return await use_case.execute(service_type, entity_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+# --- Role Management ---
+
+
+@router.get("/roles", response_model=ListRolesResponse)
+async def list_roles(
+    _: None = Depends(require_admin),
+    session: AsyncSession = Depends(get_db),
+) -> ListRolesResponse:
+    role_repo = SQLAlchemyRoleRepository(session)
+    use_case = ListRolesUseCase(role_repo)
+    roles = await use_case.execute()
+    return ListRolesResponse(items=roles)
+
+
+@router.patch("/users/{user_id}/roles", response_model=AssignRoleResponse)
+async def assign_role(
+    user_id: UUID,
+    request: AssignRoleRequest,
+    _: None = Depends(require_admin),
+    session: AsyncSession = Depends(get_db),
+) -> AssignRoleResponse:
+    role_repo = SQLAlchemyRoleRepository(session)
+    use_case = AssignUserRoleUseCase(role_repo, session)
+    try:
+        return await use_case.execute(user_id, request.role_slug)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+# --- Finance / Withdrawals ---
+
+
+@router.get("/wallet/withdrawals", response_model=WithdrawalListResponse)
+async def list_withdrawals(
+    status: str | None = Query("pending"),
+    _: None = Depends(require_admin),
+    session: AsyncSession = Depends(get_db),
+) -> WithdrawalListResponse:
+    use_case = AdminListWithdrawalsUseCase(session)
+    return await use_case.execute(status=status)
+
+
+@router.patch("/wallet/withdrawals/{transaction_id}/approve", response_model=WithdrawalResponse)
+async def approve_withdrawal(
+    transaction_id: UUID,
+    _: None = Depends(require_admin),
+    session: AsyncSession = Depends(get_db),
+) -> WithdrawalResponse:
+    use_case = AdminApproveWithdrawalUseCase(session)
+    try:
+        return await use_case.execute(transaction_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.patch("/wallet/withdrawals/{transaction_id}/reject", response_model=WithdrawalResponse)
+async def reject_withdrawal(
+    transaction_id: UUID,
+    _: None = Depends(require_admin),
+    session: AsyncSession = Depends(get_db),
+) -> WithdrawalResponse:
+    use_case = AdminRejectWithdrawalUseCase(session)
+    try:
+        return await use_case.execute(transaction_id)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

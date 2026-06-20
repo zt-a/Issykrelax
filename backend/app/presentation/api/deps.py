@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.infrastructure.database.models.owner_profile import OwnerProfileModel
 from app.infrastructure.database.models.user import UserModel
 
 security = HTTPBearer()
@@ -37,33 +36,6 @@ async def get_current_user(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
-
-
-async def require_owner(current_user: UserModel = Depends(get_current_user)) -> UserModel:
-    if current_user.is_superuser:
-        return current_user
-    await current_user.owner_profile  # lazy load
-    from app.core.database import async_session_factory
-    async with async_session_factory() as session:
-        profile_result = await session.execute(
-            select(OwnerProfileModel).where(OwnerProfileModel.user_id == current_user.id)
-        )
-        profile = profile_result.scalar_one_or_none()
-    if not profile:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Owner access required")
-    return current_user
-
-
-async def require_approved_owner(current_user: UserModel = Depends(require_owner)) -> UserModel:
-    from app.core.database import async_session_factory
-    async with async_session_factory() as session:
-        profile_result = await session.execute(
-            select(OwnerProfileModel).where(OwnerProfileModel.user_id == current_user.id)
-        )
-        profile = profile_result.scalar_one_or_none()
-    if profile and not profile.is_approved and not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Owner profile not approved yet")
-    return current_user
 
 
 async def require_admin(current_user: UserModel = Depends(get_current_user)) -> UserModel:

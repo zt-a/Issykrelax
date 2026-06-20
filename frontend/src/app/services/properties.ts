@@ -1,4 +1,4 @@
-import { apiRequest } from "./api";
+import { apiRequest, buildQueryString } from "./api";
 import type {
   CategoryResponse,
   CityResponse,
@@ -31,19 +31,7 @@ export async function getProperties(params?: {
   offset?: number;
   limit?: number;
 }): Promise<PropertyListResponse> {
-  const search = new URLSearchParams();
-  if (params?.query) search.set("query", params.query);
-  if (params?.category_id) search.set("category_id", params.category_id);
-  if (params?.city_id) search.set("city_id", params.city_id);
-  if (params?.min_price !== undefined) search.set("min_price", String(params.min_price));
-  if (params?.max_price !== undefined) search.set("max_price", String(params.max_price));
-  if (params?.max_guests !== undefined) search.set("max_guests", String(params.max_guests));
-  if (params?.amenities) search.set("amenities", params.amenities);
-  if (params?.sort_by) search.set("sort_by", params.sort_by);
-  if (params?.offset !== undefined) search.set("offset", String(params.offset));
-  if (params?.limit !== undefined) search.set("limit", String(params.limit));
-  const qs = search.toString();
-  return apiRequest<PropertyListResponse>(`/properties${qs ? `?${qs}` : ""}`);
+  return apiRequest<PropertyListResponse>(`/properties${buildQueryString(params)}`);
 }
 
 export async function getProperty(id: string): Promise<PropertyResponse> {

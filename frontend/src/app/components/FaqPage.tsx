@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { SEO } from "./SEO";
 import { breadcrumbSchema } from "../lib/schemas";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
 
 interface FaqPageProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
@@ -66,15 +67,13 @@ export function FaqPage({ onNavigate }: FaqPageProps) {
       />
       <div className="py-10 px-4" style={{ background: "linear-gradient(135deg, var(--lake-blue-dark) 0%, var(--lake-blue) 100%)" }}>
         <div className="max-w-4xl mx-auto text-center text-white">
-          <button onClick={() => onNavigate("landing")} className="inline-flex items-center gap-1 text-sm text-white/70 hover:text-white mb-4 transition-colors">
-            ← На главную
-          </button>
           <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>Часто задаваемые вопросы</h1>
           <p className="text-white/80">Всё, что нужно знать об отдыхе на Иссык-Куле и работе с IssykRelax</p>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-12 space-y-3">
+        <PageBreadcrumbs items={[{ name: "Главная", page: "landing" }, { name: "FAQ" }]} onNavigate={onNavigate} />
         {FAQS.map((faq, idx) => (
           <div key={idx} className="rounded-2xl border overflow-hidden transition-all" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
             <button

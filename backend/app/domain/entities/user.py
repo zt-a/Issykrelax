@@ -5,10 +5,19 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 
-class UserRole:
+class UserRoleSlug:
     USER = "tourist"
     OWNER = "owner"
+    DRIVER = "driver"
+    GUIDE = "guide"
+    ACTIVITY_PROVIDER = "activity_provider"
+    RESTAURANT_PARTNER = "restaurant_partner"
+    AGENCY = "agency"
+    CONCIERGE = "concierge"
+    TRANSLATOR = "translator"
     ADMIN = "admin"
+    MODERATOR = "moderator"
+    FINANCE_MANAGER = "finance_manager"
 
 
 @dataclass
@@ -22,14 +31,16 @@ class User:
     is_active: bool
     is_verified: bool
     is_superuser: bool
+    reset_token: str | None
+    reset_token_expires_at: datetime | None
     created_at: datetime
     updated_at: datetime
 
     @property
     def role(self) -> str:
         if self.is_superuser:
-            return UserRole.ADMIN
-        return UserRole.USER
+            return UserRoleSlug.ADMIN
+        return UserRoleSlug.USER
 
     @classmethod
     def create(
@@ -50,6 +61,8 @@ class User:
             is_active=True,
             is_verified=False,
             is_superuser=False,
+            reset_token=None,
+            reset_token_expires_at=None,
             created_at=now,
             updated_at=now,
         )

@@ -19,6 +19,8 @@ class SQLAlchemyBookingRepository(BookingRepository):
     async def create(self, booking: BookingEntity) -> BookingEntity:
         model = BookingModel(
             id=booking.id,
+            service_type=booking.service_type,
+            service_id=booking.service_id,
             property_id=booking.property_id,
             guest_id=booking.guest_id,
             owner_id=booking.owner_id,
@@ -45,30 +47,21 @@ class SQLAlchemyBookingRepository(BookingRepository):
 
     async def get_by_guest(self, guest_id: UUID, offset: int = 0, limit: int = 20) -> tuple[list[BookingEntity], int]:
         base = select(BookingModel).where(BookingModel.guest_id == guest_id)
-        total_result = await self._session.execute(select(func.count()).select_from(base.subquery()))
-        total = total_result.scalar() or 0
-        result = await self._session.execute(
-            base.order_by(BookingModel.created_at.desc()).offset(offset).limit(limit)
-        )
-        return [self._to_entity(m) for m in result.scalars().all()], total
+        return await self._paginate(base, offset, limit)
 
     async def get_by_owner(self, owner_id: UUID, offset: int = 0, limit: int = 20) -> tuple[list[BookingEntity], int]:
         base = select(BookingModel).where(BookingModel.owner_id == owner_id)
-        total_result = await self._session.execute(select(func.count()).select_from(base.subquery()))
-        total = total_result.scalar() or 0
-        result = await self._session.execute(
-            base.order_by(BookingModel.created_at.desc()).offset(offset).limit(limit)
-        )
-        return [self._to_entity(m) for m in result.scalars().all()], total
+        return await self._paginate(base, offset, limit)
 
     async def get_by_property(self, property_id: UUID, offset: int = 0, limit: int = 20) -> tuple[list[BookingEntity], int]:
         base = select(BookingModel).where(BookingModel.property_id == property_id)
-        total_result = await self._session.execute(select(func.count()).select_from(base.subquery()))
-        total = total_result.scalar() or 0
-        result = await self._session.execute(
-            base.order_by(BookingModel.created_at.desc()).offset(offset).limit(limit)
+        return await self._paginate(base, offset, limit)
+
+    async def get_by_service(self, service_type: str, service_id: UUID, offset: int = 0, limit: int = 20) -> tuple[list[BookingEntity], int]:
+        base = select(BookingModel).where(
+            BookingModel.service_type == service_type, BookingModel.service_id == service_id
         )
-        return [self._to_entity(m) for m in result.scalars().all()], total
+        return await self._paginate(base, offset, limit)
 
     async def get_by_verification_code(self, code: str) -> BookingEntity | None:
         result = await self._session.execute(
@@ -96,6 +89,9 @@ class SQLAlchemyBookingRepository(BookingRepository):
         if not model:
             raise ValueError("Booking not found")
 
+        model.service_type = booking.service_type
+        model.service_id = booking.service_id
+        model.property_id = booking.property_id
         model.check_in = booking.check_in
         model.check_out = booking.check_out
         model.total_price = float(booking.total_price)
@@ -116,9 +112,19 @@ class SQLAlchemyBookingRepository(BookingRepository):
             await self._session.delete(model)
             await self._session.flush()
 
+    async def _paginate(self, base, offset: int, limit: int) -> tuple[list[BookingEntity], int]:
+        total_result = await self._session.execute(select(func.count()).select_from(base.subquery()))
+        total = total_result.scalar() or 0
+        result = await self._session.execute(
+            base.order_by(BookingModel.created_at.desc()).offset(offset).limit(limit)
+        )
+        return [self._to_entity(m) for m in result.scalars().all()], total
+
     def _to_entity(self, model: BookingModel) -> BookingEntity:
         return BookingEntity(
             id=model.id,
+            service_type=model.service_type,
+            service_id=model.service_id,
             property_id=model.property_id,
             guest_id=model.guest_id,
             owner_id=model.owner_id,

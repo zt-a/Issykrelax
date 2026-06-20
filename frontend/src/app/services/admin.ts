@@ -1,4 +1,4 @@
-import { apiRequest } from "./api";
+import { apiRequest, buildQueryString } from "./api";
 import type {
   AdminOwnerListResponse,
   AdminPropertyListResponse,
@@ -7,6 +7,8 @@ import type {
   AdminPropertyDetailResponse,
   AdminOwnerDetailResponse,
   AdminStatsResponse,
+  WithdrawalListResponse,
+  WithdrawalResponse,
 } from "../types/api";
 
 export async function getAdminOwners(params?: {
@@ -14,12 +16,7 @@ export async function getAdminOwners(params?: {
   offset?: number;
   limit?: number;
 }): Promise<AdminOwnerListResponse> {
-  const search = new URLSearchParams();
-  if (params?.approved !== undefined) search.set("approved", String(params.approved));
-  if (params?.offset !== undefined) search.set("offset", String(params.offset));
-  if (params?.limit !== undefined) search.set("limit", String(params.limit));
-  const qs = search.toString();
-  return apiRequest<AdminOwnerListResponse>(`/admin/owners${qs ? `?${qs}` : ""}`);
+  return apiRequest<AdminOwnerListResponse>(`/admin/owners${buildQueryString(params)}`);
 }
 
 export async function approveOwner(id: string): Promise<void> {
@@ -31,12 +28,7 @@ export async function getAdminProperties(params?: {
   offset?: number;
   limit?: number;
 }): Promise<AdminPropertyListResponse> {
-  const search = new URLSearchParams();
-  if (params?.status) search.set("status", params.status);
-  if (params?.offset !== undefined) search.set("offset", String(params.offset));
-  if (params?.limit !== undefined) search.set("limit", String(params.limit));
-  const qs = search.toString();
-  return apiRequest<AdminPropertyListResponse>(`/admin/properties${qs ? `?${qs}` : ""}`);
+  return apiRequest<AdminPropertyListResponse>(`/admin/properties${buildQueryString(params)}`);
 }
 
 export async function approveProperty(id: string): Promise<void> {
@@ -48,12 +40,7 @@ export async function getAdminBookings(params?: {
   offset?: number;
   limit?: number;
 }): Promise<AdminBookingListResponse> {
-  const search = new URLSearchParams();
-  if (params?.status) search.set("status", params.status);
-  if (params?.offset !== undefined) search.set("offset", String(params.offset));
-  if (params?.limit !== undefined) search.set("limit", String(params.limit));
-  const qs = search.toString();
-  return apiRequest<AdminBookingListResponse>(`/admin/bookings${qs ? `?${qs}` : ""}`);
+  return apiRequest<AdminBookingListResponse>(`/admin/bookings${buildQueryString(params)}`);
 }
 
 export async function getAdminStats(): Promise<AdminStatsResponse> {
@@ -70,4 +57,17 @@ export async function getAdminPropertyDetail(id: string): Promise<AdminPropertyD
 
 export async function getAdminOwnerDetail(id: string): Promise<AdminOwnerDetailResponse> {
   return apiRequest<AdminOwnerDetailResponse>(`/admin/owners/${id}`);
+}
+
+export async function getWithdrawals(status?: string): Promise<WithdrawalListResponse> {
+  const search = status ? `?status=${status}` : "";
+  return apiRequest<WithdrawalListResponse>(`/admin/wallet/withdrawals${search}`);
+}
+
+export async function approveWithdrawal(id: string): Promise<WithdrawalResponse> {
+  return apiRequest<WithdrawalResponse>(`/admin/wallet/withdrawals/${id}/approve`, { method: "PATCH" });
+}
+
+export async function rejectWithdrawal(id: string): Promise<WithdrawalResponse> {
+  return apiRequest<WithdrawalResponse>(`/admin/wallet/withdrawals/${id}/reject`, { method: "PATCH" });
 }

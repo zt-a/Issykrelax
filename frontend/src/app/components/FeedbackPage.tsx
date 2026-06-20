@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, MessageSquare, Send } from "lucide-react";
 import { apiRequest } from "../services/api";
 import { SEO } from "./SEO";
 import { breadcrumbSchema } from "../lib/schemas";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
 
 interface FeedbackPageProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
@@ -46,6 +47,7 @@ export function FeedbackPage({ onNavigate }: FeedbackPageProps) {
           { name: "Обратная связь", url: "/feedback" },
         ])}
       />
+      <PageBreadcrumbs items={[{ name: "Главная", page: "landing" }, { name: "Обратная связь" }]} onNavigate={onNavigate} />
       <h1 className="text-3xl font-bold text-center mb-2" style={{ color: "var(--text-primary)" }}>Обратная связь</h1>
       <p className="text-center mb-12" style={{ color: "var(--text-secondary)" }}>
         Есть вопрос или предложение? Напишите нам!

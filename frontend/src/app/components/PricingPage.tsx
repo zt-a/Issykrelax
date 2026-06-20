@@ -1,6 +1,7 @@
 import { CheckCircle, X, Zap, Shield, Crown, HelpCircle } from "lucide-react";
 import { SEO } from "./SEO";
 import { breadcrumbSchema } from "../lib/schemas";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
@@ -107,6 +108,7 @@ export function PricingPage({ onNavigate }: PricingPageProps) {
 
       {/* Plans */}
       <div className="max-w-6xl mx-auto px-4 py-16">
+        <PageBreadcrumbs items={[{ name: "Главная", page: "landing" }, { name: "Тарифы" }]} onNavigate={onNavigate} />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {PLANS.map((plan) => (
             <div

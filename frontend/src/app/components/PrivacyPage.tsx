@@ -1,5 +1,6 @@
 import { SEO } from "./SEO";
 import { breadcrumbSchema } from "../lib/schemas";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
 
 interface PrivacyPageProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
@@ -17,9 +18,7 @@ export function PrivacyPage({ onNavigate }: PrivacyPageProps) {
           { name: "Политика конфиденциальности", url: "/privacy" },
         ])}
       />
-      <button onClick={() => onNavigate("landing")} className="inline-flex items-center gap-1 text-sm mb-6 transition-colors" style={{ color: "var(--lake-blue)" }}>
-        ← На главную
-      </button>
+      <PageBreadcrumbs items={[{ name: "Главная", page: "landing" }, { name: "Политика конфиденциальности" }]} onNavigate={onNavigate} />
       <h1 className="text-3xl font-bold mb-6" style={{ color: "var(--text-primary)" }}>Политика конфиденциальности</h1>
 
       <div className="prose prose-sm max-w-none space-y-6" style={{ color: "var(--text-secondary)" }}>

@@ -3,24 +3,20 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.domain.entities.property import PropertyStatus
-from app.infrastructure.database.models.property import PropertyModel
+from app.domain.interfaces.repositories.property_repository import PropertyRepository
 
 
 class ApprovePropertyUseCase:
-    def __init__(self, session: AsyncSession) -> None:
-        self._session = session
+    def __init__(self, property_repo: PropertyRepository) -> None:
+        self._property_repo = property_repo
 
     async def execute(self, property_id: UUID) -> dict[str, Any]:
-        result = await self._session.execute(select(PropertyModel).where(PropertyModel.id == property_id))
-        model = result.scalar_one_or_none()
-        if not model:
+        property = await self._property_repo.get_by_id(property_id)
+        if not property:
             raise ValueError("Property not found")
 
-        model.status = PropertyStatus.PUBLISHED
-        await self._session.flush()
+        property.status = PropertyStatus.PUBLISHED
+        await self._property_repo.update(property)
 
         return {"id": str(property_id), "status": PropertyStatus.PUBLISHED}

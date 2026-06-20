@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { SEO } from "./SEO";
 import { Button } from "./ui/button";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
 import logotip from "@/assets/logo.png";
 
 interface LoginPageProps {
@@ -46,6 +47,7 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--surface)" }}>
       <SEO title="Вход" description="Войдите в аккаунт IssykRelax, чтобы управлять бронированиями, избранным и настройками на крупнейшем маркетплейсе отдыха на Иссык-Куле." canonical="/login" />
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto p-8">
+        <PageBreadcrumbs items={[{ name: "Главная", page: "landing" }, { name: "Вход" }]} onNavigate={onNavigate} />
         <div className="text-center mb-8">
           <button onClick={() => onNavigate("landing")} className="inline-flex items-center gap-2 mb-4">
             <img src={logotip} alt="IssykRelax" className="h-8 w-auto" />
@@ -64,7 +66,7 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
               value={email}
               onChange={(e) => { setEmail(e.target.value); setFieldErrors((prev) => ({ ...prev, email: "" })); }}
               className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none transition-all focus:ring-2"
-              style={{ borderColor: fieldErrors.email ? "#ef4444" : "var(--border)", focus: "none" }}
+              style={{ borderColor: fieldErrors.email ? "#ef4444" : "var(--border)" }}
               placeholder="email@example.com"
             />
             {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}

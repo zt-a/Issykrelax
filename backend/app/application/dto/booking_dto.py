@@ -1,25 +1,29 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 from pydantic import BaseModel
 
 
 class CreateBookingRequest(BaseModel):
-    property_id: str
-    check_in: date
-    check_out: date
-    guest_count: int
+    property_id: str | None = None
+    service_type: str = "property"
+    service_id: str | None = None
+    check_in: date | None = None
+    check_out: date | None = None
+    guest_count: int = 1
     special_requests: str | None = None
 
 
 class BookingResponse(BaseModel):
     id: str
-    property_id: str
+    service_type: str
+    service_id: str | None = None
+    property_id: str | None = None
     guest_id: str
     owner_id: str
-    check_in: str
-    check_out: str
+    check_in: str | None = None
+    check_out: str | None = None
     total_price: float
     status: str
     guest_count: int

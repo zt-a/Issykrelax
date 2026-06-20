@@ -10,17 +10,29 @@ class BookingStatus:
     PENDING = "pending"
     PAID = "paid"
     CHECKED_IN = "checked_in"
+    COMPLETED = "completed"
     CANCELLED = "cancelled"
+
+
+class ServiceType:
+    PROPERTY = "property"
+    TRANSFER = "transfer"
+    TOUR = "tour"
+    ACTIVITY = "activity"
+    RESTAURANT = "restaurant"
+    PACKAGE = "package"
 
 
 @dataclass
 class Booking:
     id: UUID
-    property_id: UUID
+    service_type: str
+    service_id: UUID | None
+    property_id: UUID | None
     guest_id: UUID
     owner_id: UUID
-    check_in: datetime
-    check_out: datetime
+    check_in: datetime | None
+    check_out: datetime | None
     total_price: Decimal
     status: str
     guest_count: int
@@ -34,19 +46,23 @@ class Booking:
     @classmethod
     def create(
         cls,
-        property_id: UUID,
         guest_id: UUID,
         owner_id: UUID,
-        check_in: datetime,
-        check_out: datetime,
         total_price: Decimal,
-        guest_count: int,
+        service_type: str = ServiceType.PROPERTY,
+        service_id: UUID | None = None,
+        property_id: UUID | None = None,
+        check_in: datetime | None = None,
+        check_out: datetime | None = None,
+        guest_count: int = 1,
         verification_code: str | None = None,
         special_requests: str | None = None,
     ) -> Booking:
         now = datetime.now()
         return cls(
             id=uuid4(),
+            service_type=service_type,
+            service_id=service_id,
             property_id=property_id,
             guest_id=guest_id,
             owner_id=owner_id,
@@ -77,6 +93,10 @@ class Booking:
 
     def mark_checked_in(self) -> None:
         self.status = BookingStatus.CHECKED_IN
+        self.updated_at = datetime.now()
+
+    def complete(self) -> None:
+        self.status = BookingStatus.COMPLETED
         self.updated_at = datetime.now()
 
     def cancel(self) -> None:

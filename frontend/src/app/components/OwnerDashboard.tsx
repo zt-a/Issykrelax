@@ -3,6 +3,7 @@ import { TrendingUp, Calendar, Eye, Star, Plus, DollarSign, X } from "lucide-rea
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 import { getOwnerProperties, getOwnerBookings, getOwnerWallet, checkInBooking, cancelOwnerBooking } from "../services/owner";
+import { BOOKING_STATUS_CONFIG } from "../lib/booking-status";
 import type { PropertyResponse, BookingResponse, WalletResponse } from "../types/api";
 import {
   AlertDialog,
@@ -15,17 +16,13 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { ImgWithFallback } from "./ui/img-with-fallback";
+import { WalletSection } from "./WalletSection";
 
 interface OwnerDashboardProps {
   onNavigate: (page: string) => void;
 }
 
-const STATUS_CFG: Record<string, { label: string; color: string; bg: string }> = {
-  paid: { label: "Подтверждено", color: "var(--turquoise)", bg: "var(--turquoise-light)" },
-  checked_in: { label: "Заселён", color: "var(--lake-blue)", bg: "var(--lake-blue-light)" },
-  cancelled: { label: "Отменён", color: "#ef4444", bg: "#fee2e2" },
-  completed: { label: "Завершён", color: "var(--text-secondary)", bg: "var(--surface)" },
-};
+const STATUS_CFG = BOOKING_STATUS_CONFIG;
 
 const TABS = ["Обзор", "Объявления", "Бронирования", "Кошелёк"];
 
@@ -358,45 +355,7 @@ export function OwnerDashboard({ onNavigate }: OwnerDashboardProps) {
           </div>
         )}
 
-        {tab === "Кошелёк" && wallet && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="rounded-2xl border p-6" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
-              <h3 className="font-bold mb-4" style={{ color: "var(--text-primary)" }}>Доступный баланс</h3>
-              <div className="text-3xl font-bold mb-2" style={{ color: "var(--lake-blue)" }}>
-                {wallet.available_balance.toLocaleString()} Сом
-              </div>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                В ожидании: {wallet.pending_balance.toLocaleString()} Сом
-              </p>
-            </div>
-            <div className="rounded-2xl border p-6" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
-              <h3 className="font-bold mb-4" style={{ color: "var(--text-primary)" }}>Транзакции</h3>
-              {wallet.transactions.length === 0 ? (
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Нет транзакций</p>
-              ) : (
-                <div className="space-y-3">
-                  {wallet.transactions.map((t) => (
-                    <div key={t.id} className="flex justify-between items-center py-2 border-b last:border-b-0" style={{ borderColor: "var(--border)" }}>
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                          {t.type === "payment" ? "Оплата" : t.type === "refund" ? "Возврат" : t.type}
-                        </p>
-                        <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                          {new Date(t.created_at).toLocaleDateString("ru-RU")}
-                        </p>
-                      </div>
-                      <span className="font-bold text-sm" style={{
-                        color: t.type === "refund" ? "#ef4444" : "var(--turquoise)",
-                      }}>
-                        {t.type === "refund" ? "-" : "+"}{t.amount.toLocaleString()} Сом
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {tab === "Кошелёк" && <WalletSection />}
       </div>
 
       {selectedBooking && (

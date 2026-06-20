@@ -1,20 +1,15 @@
-import { useState } from "react";
-import { Star, MapPin, Clock, Phone, Heart, Search, Utensils, Fish, Beef, Leaf, Coffee, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Star, MapPin, Clock, Phone, Heart, Search, Utensils, Fish, Beef, Leaf, Coffee } from "lucide-react";
+import { toast } from "sonner";
 import { SEO } from "./SEO";
 import { breadcrumbSchema } from "../lib/schemas";
+import { listRestaurantsApi } from "../services/restaurants-service";
+import type { RestaurantResponse } from "../types/api";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
 
 interface RestaurantsPageProps {
   onNavigate: (page: string) => void;
 }
-
-const RESTAURANTS = [
-  { id: 1, name: "Ресторан «Иссык-Куль»", cuisine: "Кыргызская", price: "$$", rating: 4.8, reviews: 312, hours: "10:00–23:00", location: "Чолпон-Ата, ул. Садовая 14", phone: "+996 312 456789", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop", tags: ["Вид на озеро", "Терраса", "Детское меню"], cuisineType: "kyrgyz" },
-  { id: 2, name: "Taverna Mediterran", cuisine: "Средиземноморская", price: "$$$", rating: 4.7, reviews: 187, hours: "12:00–01:00", location: "Бостери, пр. Прибрежный 8", phone: "+996 312 567890", image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop", tags: ["Свежая рыба", "Вино", "Романтично"], cuisineType: "sea" },
-  { id: 3, name: "Кафе «Манас»", cuisine: "Кыргызская / Русская", price: "$", rating: 4.6, reviews: 445, hours: "08:00–22:00", location: "Чолпон-Ата, центр", phone: "+996 312 345678", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop", tags: ["Завтраки", "Семейное", "Доступные цены"], cuisineType: "kyrgyz" },
-  { id: 4, name: "Steak House «Гриль»", cuisine: "Мясная", price: "$$$", rating: 4.9, reviews: 98, hours: "13:00–00:00", location: "Бостери", phone: "+996 312 678901", image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop", tags: ["Мясо на гриле", "Барбекю зона", "VIP-залы"], cuisineType: "meat" },
-  { id: 5, name: "Вегетарианское кафе «Зелёная лагуна»", cuisine: "Вегетарианская", price: "$$", rating: 4.5, reviews: 62, hours: "09:00–21:00", location: "Тамчы", phone: "+996 312 789012", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop", tags: ["Веганское меню", "Эко-продукты", "Без глютена"], cuisineType: "veg" },
-  { id: 6, name: "Чайхана «Восток»", cuisine: "Восточная", price: "$", rating: 4.4, reviews: 231, hours: "07:00–23:00", location: "Кара-Ой", phone: "+996 312 890123", image: "https://images.unsplash.com/photo-1534482421-64566f976cfa?w=600&h=400&fit=crop", tags: ["Плов", "Шашлык", "Кальян"], cuisineType: "eastern" },
-];
 
 const CUISINE_FILTERS = [
   { key: "all", label: "Все кухни", icon: Utensils },
@@ -25,30 +20,50 @@ const CUISINE_FILTERS = [
   { key: "eastern", label: "Восточная", icon: Coffee },
 ];
 
+const CUISINE_KEYWORDS: Record<string, string[]> = {
+  kyrgyz: ["кыргыз", "kyrgyz", "националь", "ашлянфу"],
+  sea: ["мор", "рыб", "sea", "fish"],
+  meat: ["мяс", "meat", "гриль", "steak"],
+  veg: ["вегет", "веган", "veg", "эко"],
+  eastern: ["восточ", "eastern", "узбек", "плов"],
+};
+
 export function RestaurantsPage({ onNavigate }: RestaurantsPageProps) {
+  const [restaurants, setRestaurants] = useState<RestaurantResponse[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [cuisineFilter, setCuisineFilter] = useState("all");
   const [sortBy, setSortBy] = useState("rating");
-  const [saved, setSaved] = useState<number[]>([]);
+  const [saved, setSaved] = useState<string[]>([]);
 
-  const filtered = RESTAURANTS.filter((r) => {
-    if (cuisineFilter !== "all" && r.cuisineType !== cuisineFilter) return false;
-    if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.cuisine.toLowerCase().includes(search.toLowerCase())) return false;
+  useEffect(() => {
+    listRestaurantsApi()
+      .then((res) => setRestaurants(res.items))
+      .catch(() => toast.error("Ошибка загрузки ресторанов"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = restaurants.filter((r) => {
+    if (cuisineFilter !== "all") {
+      const kw = CUISINE_KEYWORDS[cuisineFilter] || [];
+      const matches = kw.some((k) => (r.cuisine_type || "").toLowerCase().includes(k) || (r.description || "").toLowerCase().includes(k));
+      if (!matches) return false;
+    }
+    if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !(r.cuisine_type || "").toLowerCase().includes(search.toLowerCase())) return false;
     return true;
-  }).sort((a, b) => sortBy === "rating" ? b.rating - a.rating : b.reviews - a.reviews);
+  });
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <SEO
         title="Рестораны и кафе на Иссык-Куле — где поесть в Чолпон-Ате, Бостери"
-        description="Лучшие рестораны, кафе и столовые на Иссык-Куле, Кыргызстан. Кыргызская, средиземноморская, восточная, мясная, вегетарианская кухня в Чолпон-Ате, Бостери, Тамчы. Бронируйте столики онлайн."
+        description="Лучшие рестораны, кафе и столовые на Иссык-Куле, Кыргызстан"
         canonical="/restaurants"
         jsonLd={breadcrumbSchema([
           { name: "Главная", url: "/" },
           { name: "Рестораны", url: "/restaurants" },
         ])}
       />
-      {/* Header */}
       <div className="py-10 px-4" style={{ background: "linear-gradient(135deg, var(--lake-blue-dark) 0%, var(--lake-blue) 100%)" }}>
         <div className="max-w-7xl mx-auto text-center text-white">
           <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
@@ -70,7 +85,7 @@ export function RestaurantsPage({ onNavigate }: RestaurantsPageProps) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Filters */}
+        <PageBreadcrumbs items={[{ name: "Главная", page: "landing" }, { name: "Рестораны" }]} onNavigate={onNavigate} />
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div className="flex items-center gap-2 flex-wrap">
             {CUISINE_FILTERS.map((f) => (
@@ -103,72 +118,75 @@ export function RestaurantsPage({ onNavigate }: RestaurantsPageProps) {
           </div>
         </div>
 
-        <p className="text-sm mb-5" style={{ color: "var(--text-secondary)" }}>
-          Найдено <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{filtered.length}</span> ресторанов
-        </p>
-
-        {/* Restaurant cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((r) => (
-            <div
-              key={r.id}
-              className="rounded-2xl border shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden"
-              style={{ borderColor: "var(--border)", background: "var(--card)" }}
-            >
-              <div className="relative overflow-hidden" style={{ height: 220 }}>
-                <img src={r.image} alt={r.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-                <button
-                  onClick={() => setSaved((prev) => prev.includes(r.id) ? prev.filter((i) => i !== r.id) : [...prev, r.id])}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm"
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: "var(--lake-blue)" }} />
+          </div>
+        ) : (
+          <>
+            <p className="text-sm mb-5" style={{ color: "var(--text-secondary)" }}>
+              Найдено <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{filtered.length}</span> ресторанов
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((r) => (
+                <div
+                  key={r.id}
+                  className="rounded-2xl border shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden cursor-pointer"
+                  style={{ borderColor: "var(--border)", background: "var(--card)" }}
+                  onClick={() => onNavigate("restaurant", { restaurant_id: r.id })}
                 >
-                  <Heart size={15} fill={saved.includes(r.id) ? "#ef4444" : "none"} stroke={saved.includes(r.id) ? "#ef4444" : "#6b8299"} />
-                </button>
-                <div className="absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-bold" style={{ background: "white", color: "var(--text-primary)" }}>
-                  {r.price}
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{r.name}</h3>
-                  <div className="flex items-center gap-0.5 flex-shrink-0">
-                    <Star size={12} fill="var(--sand)" stroke="var(--sand)" />
-                    <span className="text-xs font-bold">{r.rating}</span>
-                    <span className="text-xs" style={{ color: "var(--text-secondary)" }}>({r.reviews})</span>
+                  <div className="relative overflow-hidden" style={{ height: 220, background: "var(--surface)" }}>
+                    <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--lake-blue-light)" }}>
+                      <Utensils size={40} style={{ color: "var(--lake-blue)" }} />
+                    </div>
+                    <button
+                      onClick={() => setSaved((prev) => prev.includes(r.id) ? prev.filter((i) => i !== r.id) : [...prev, r.id])}
+                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm"
+                    >
+                      <Heart size={15} fill={saved.includes(r.id) ? "#ef4444" : "none"} stroke={saved.includes(r.id) ? "#ef4444" : "#6b8299"} />
+                    </button>
+                    {r.price_range && (
+                      <div className="absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-bold" style={{ background: "white", color: "var(--text-primary)" }}>
+                        {r.price_range}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{r.name}</h3>
+                    </div>
+                    {r.cuisine_type && <p className="text-xs mb-2" style={{ color: "var(--turquoise)" }}>{r.cuisine_type}</p>}
+                    {r.address && (
+                      <div className="flex items-center gap-1 mb-2">
+                        <MapPin size={11} style={{ color: "var(--text-secondary)" }} />
+                        <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{r.address}</span>
+                      </div>
+                    )}
+                    {r.opening_hours && (
+                      <div className="flex items-center gap-1 mb-3">
+                        <Clock size={11} style={{ color: "var(--text-secondary)" }} />
+                        <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{r.opening_hours}</span>
+                      </div>
+                    )}
+                    {r.description && (
+                      <p className="text-xs mb-3" style={{ color: "var(--text-secondary)" }}>{r.description}</p>
+                    )}
+                    <div className="flex gap-2">
+                      {r.phone && (
+                        <a href={`tel:${r.phone}`} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-xs font-medium transition-colors hover:bg-gray-50" style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}>
+                          <Phone size={13} /> Позвонить
+                        </a>
+                      )}
+                      <button className="flex-1 py-2 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90" style={{ background: "var(--lake-blue)" }}>
+                        Забронировать столик
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <p className="text-xs mb-2" style={{ color: "var(--turquoise)" }}>{r.cuisine}</p>
-                <div className="flex items-center gap-1 mb-2">
-                  <MapPin size={11} style={{ color: "var(--text-secondary)" }} />
-                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{r.location}</span>
-                </div>
-                <div className="flex items-center gap-1 mb-3">
-                  <Clock size={11} style={{ color: "var(--text-secondary)" }} />
-                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{r.hours}</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {r.tags.map((tag) => (
-                    <span key={tag} className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--surface)", color: "var(--text-secondary)" }}>{tag}</span>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <a
-                    href={`tel:${r.phone}`}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-xs font-medium transition-colors hover:bg-gray-50"
-                    style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
-                  >
-                    <Phone size={13} /> Позвонить
-                  </a>
-                  <button
-                    className="flex-1 py-2 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90"
-                    style={{ background: "var(--lake-blue)" }}
-                  >
-                    Забронировать столик
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

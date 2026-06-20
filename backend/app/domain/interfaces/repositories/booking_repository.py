@@ -24,6 +24,9 @@ class BookingRepository(ABC):
     async def get_by_property(self, property_id: UUID, offset: int = 0, limit: int = 20) -> tuple[list[Booking], int]: ...
 
     @abstractmethod
+    async def get_by_service(self, service_type: str, service_id: UUID, offset: int = 0, limit: int = 20) -> tuple[list[Booking], int]: ...
+
+    @abstractmethod
     async def get_by_verification_code(self, code: str) -> Booking | None: ...
 
     @abstractmethod

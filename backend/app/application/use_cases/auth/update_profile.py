@@ -3,18 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.application.dto.auth_dto import UpdateProfileRequest, UserResponse
 from app.domain.interfaces.repositories.user_repository import UserRepository
-from app.infrastructure.database.models.owner_profile import OwnerProfileModel
 
 
 class UpdateProfileUseCase:
-    def __init__(self, user_repo: UserRepository, session: AsyncSession) -> None:
+    def __init__(self, user_repo: UserRepository) -> None:
         self._user_repo = user_repo
-        self._session = session
 
     async def execute(self, user_id: UUID, request: UpdateProfileRequest) -> UserResponse:
         user = await self._user_repo.get_by_id(user_id)
@@ -33,12 +28,8 @@ class UpdateProfileUseCase:
         await self._user_repo.update(user)
 
         role = user.role
-        if role == "tourist":
-            result = await self._session.execute(
-                select(OwnerProfileModel).where(OwnerProfileModel.user_id == user_id)
-            )
-            if result.scalar_one_or_none():
-                role = "owner"
+        if role == "tourist" and await self._user_repo.has_owner_profile(user_id):
+            role = "owner"
 
         return UserResponse(
             id=str(user.id),

@@ -6,6 +6,7 @@ import { breadcrumbSchema } from "../lib/schemas";
 import { Button } from "./ui/button";
 import { Slider } from "./ui/slider";
 import { ImgWithFallback } from "./ui/img-with-fallback";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
 import { getProperties, getCities } from "../services/properties";
 import { addFavorite, removeFavorite, getFavoriteIds } from "../services/favorites";
 import { useAuth } from "../context/AuthContext";
@@ -257,6 +258,7 @@ export function SearchResults({ onNavigate, params }: SearchResultsProps) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <PageBreadcrumbs items={[{ name: "Главная", page: "landing" }, { name: "Поиск жилья" }]} onNavigate={onNavigate} />
         <div className="flex gap-6">
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-24 p-5 rounded-2xl border" style={{ borderColor: "var(--border)", background: "var(--card)" }}>

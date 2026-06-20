@@ -6,12 +6,13 @@ import { Helmet } from "react-helmet-async";
 import { getAdminStats, getAdminOwners, getAdminProperties, getAdminBookings, approveOwner, approveProperty } from "../services/admin";
 import type { AdminStatsResponse, AdminOwnerResponse, AdminPropertyResponse, AdminBookingResponse } from "../types/api";
 import { AdminBookingDetailModal, AdminPropertyDetailModal, AdminOwnerDetailModal } from "./AdminDetailModals";
+import { FinancePanel } from "./FinancePanel";
 
 interface AdminPanelProps {
   onNavigate: (page: string) => void;
 }
 
-const TABS = ["Дашборд", "Владельцы", "Объявления", "Бронирования"];
+const TABS = ["Дашборд", "Владельцы", "Объявления", "Бронирования", "Финансы"];
 
 const STATUS_COLORS: Record<string, { color: string; bg: string; label: string }> = {
   pending: { color: "#f59e0b", bg: "#fef3c7", label: "Ожидание" },
@@ -20,11 +21,17 @@ const STATUS_COLORS: Record<string, { color: string; bg: string; label: string }
   cancelled: { color: "#ef4444", bg: "#fee2e2", label: "Отменён" },
 };
 
-const PIE_DATA = [
-  { name: "Активные", value: 60, color: "var(--lake-blue)" },
-  { name: "На проверке", value: 25, color: "#f59e0b" },
-  { name: "Неактивные", value: 15, color: "#64748b" },
-];
+function computePieData(properties: AdminPropertyResponse[]) {
+  const total = properties.length || 1;
+  const active = properties.filter((p) => p.status === "published" && p.is_active).length;
+  const pending = properties.filter((p) => p.status === "draft").length;
+  const inactive = total - active - pending;
+  return [
+    { name: "Активные", value: Math.round((active / total) * 100), color: "var(--lake-blue)" },
+    { name: "На проверке", value: Math.round((pending / total) * 100), color: "#f59e0b" },
+    { name: "Неактивные", value: Math.round((inactive / total) * 100), color: "#64748b" },
+  ];
+}
 
 export function AdminPanel({ onNavigate }: AdminPanelProps) {
   const [tab, setTab] = useState("Дашборд");
@@ -181,8 +188,8 @@ export function AdminPanel({ onNavigate }: AdminPanelProps) {
                 <h3 className="font-bold mb-4" style={{ color: "var(--text-primary)" }}>Объявления по статусу</h3>
                 <ResponsiveContainer width="100%" height={160}>
                   <PieChart>
-                    <Pie data={PIE_DATA} dataKey="value" cx="50%" cy="50%" outerRadius={70} label={({ name, value }) => `${value}%`}>
-                      {PIE_DATA.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                    <Pie data={computePieData(properties)} dataKey="value" cx="50%" cy="50%" outerRadius={70} label={({ name, value }) => `${value}%`}>
+                      {computePieData(properties).map((entry, i) => <Cell key={i} fill={entry.color} />)}
                     </Pie>
                     <Tooltip />
                   </PieChart>
@@ -229,6 +236,25 @@ export function AdminPanel({ onNavigate }: AdminPanelProps) {
                 </div>
               </div>
             )}
+
+            {stats?.role_counts && stats.role_counts.length > 0 && (
+              <div className="rounded-2xl border" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+                <div className="p-5 border-b" style={{ borderColor: "var(--border)" }}>
+                  <h3 className="font-bold" style={{ color: "var(--text-primary)" }}>Распределение по ролям</h3>
+                </div>
+                <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+                  {stats.role_counts.map((r) => (
+                    <div key={r.slug} className="p-4 flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{r.name}</div>
+                        <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{r.slug}</div>
+                      </div>
+                      <span className="text-sm font-bold" style={{ color: "var(--lake-blue)" }}>{r.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -253,7 +279,7 @@ export function AdminPanel({ onNavigate }: AdminPanelProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {owners.filter((o) => !search || o.full_name.toLowerCase().includes(search.toLowerCase())).map((o) => (
+                  {owners.filter((o) => !search || o.full_name.toLowerCase().includes(search.toLowerCase()) || o.email.toLowerCase().includes(search.toLowerCase())).map((o) => (
                     <tr key={o.id} className="border-t hover:bg-gray-50 transition-colors cursor-pointer" style={{ borderColor: "var(--border)" }} onClick={() => setDetailOwnerId(o.id)}>
                       <td className="p-4"><div className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{o.full_name}</div></td>
                       <td className="p-4 text-sm" style={{ color: "var(--text-secondary)" }}>{o.email}</td>
@@ -327,6 +353,8 @@ export function AdminPanel({ onNavigate }: AdminPanelProps) {
             )}
           </div>
         )}
+
+        {tab === "Финансы" && <FinancePanel />}
 
         {tab === "Бронирования" && (
           <div className="rounded-2xl border" style={{ borderColor: "var(--border)", background: "var(--card)" }}>

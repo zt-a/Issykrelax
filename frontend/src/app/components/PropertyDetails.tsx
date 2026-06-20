@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Star, MapPin, ChevronLeft, CheckCircle, Users, Bed, Bath, Calendar, Instagram, MessageCircle, Phone, Heart } from "lucide-react";
+import { Star, MapPin, ChevronLeft, ChevronRight, CheckCircle, Users, Bed, Bath, Calendar, Instagram, MessageCircle, Phone, Heart, ArrowLeft, Home } from "lucide-react";
 import { toast } from "sonner";
 import { SEO } from "./SEO";
 import { vacationRentalSchema, breadcrumbSchema } from "../lib/schemas";
 import { Button } from "./ui/button";
 import { ImgWithFallback } from "./ui/img-with-fallback";
-import { getProperty } from "../services/properties";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
+import { getProperty, getProperties } from "../services/properties";
 import { getPropertyReviews, createReview } from "../services/reviews";
 import { createBooking } from "../services/bookings";
 import { addFavorite, removeFavorite, getFavoriteIds } from "../services/favorites";
@@ -34,6 +35,8 @@ export function PropertyDetails({ onNavigate, propertyId }: PropertyDetailsProps
   const [submittingReview, setSubmittingReview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [similar, setSimilar] = useState<PropertyResponse[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     if (!propertyId) return;
@@ -46,6 +49,11 @@ export function PropertyDetails({ onNavigate, propertyId }: PropertyDetailsProps
         ]);
         setProperty(prop);
         setReviews(revs.items);
+        if (prop.city?.id) {
+          getProperties({ city_id: prop.city.id, limit: "4" }).then((res) => {
+            setSimilar(res.items.filter((p) => p.id !== prop.id).slice(0, 3));
+          }).catch(() => {});
+        }
       } catch (err) {
         console.error("Failed to load property", err);
       } finally {
@@ -164,11 +172,13 @@ export function PropertyDetails({ onNavigate, propertyId }: PropertyDetailsProps
         ]}
       />
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <PageBreadcrumbs items={[
+          { name: "Главная", page: "landing" },
+          { name: "Поиск жилья", page: "search" },
+          { name: property?.title || "" },
+        ]} onNavigate={onNavigate} />
         <div className="flex items-start justify-between mb-4">
           <div>
-            <button onClick={() => onNavigate("search")} className="flex items-center gap-1 text-sm mb-3 hover:underline" style={{ color: "var(--lake-blue)" }}>
-              <ChevronLeft size={16} /> Назад к поиску
-            </button>
             <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>
               {property.title}
             </h1>
@@ -383,6 +393,36 @@ export function PropertyDetails({ onNavigate, propertyId }: PropertyDetailsProps
                 ))}
               </div>
             </div>
+
+            {similar.length > 0 && (
+              <div>
+                <h2 className="text-xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>Похожие объекты</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {similar.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => { onNavigate("property", { property_id: s.id }); }}
+                      className="group text-left rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition-all"
+                      style={{ borderColor: "var(--border)", background: "var(--card)" }}
+                    >
+                      <div className="overflow-hidden" style={{ height: 140 }}>
+                        <ImgWithFallback src={s.images?.[0]} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      </div>
+                      <div className="p-3">
+                        <div className="font-semibold text-xs leading-snug mb-1" style={{ color: "var(--text-primary)" }}>{s.title}</div>
+                        <div className="flex items-center gap-1 mb-1">
+                          <MapPin size={10} style={{ color: "var(--text-secondary)" }} />
+                          <span className="text-[10px]" style={{ color: "var(--text-secondary)" }}>{s.city?.name || "Иссык-Куль"}</span>
+                        </div>
+                        <div className="font-bold text-sm" style={{ color: "var(--lake-blue)" }}>
+                          {s.price_per_night.toLocaleString()} Сом / ночь
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-1">

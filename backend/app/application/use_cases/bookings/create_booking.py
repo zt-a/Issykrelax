@@ -38,12 +38,13 @@ class CreateBookingUseCase:
         verification_code = secrets.token_hex(3).upper()
 
         booking = Booking.create(
-            property_id=UUID(request.property_id),
             guest_id=guest_id,
             owner_id=owner_id,
+            total_price=total_price,
+            service_type="property",
+            property_id=UUID(request.property_id) if request.property_id else None,
             check_in=check_in,
             check_out=check_out,
-            total_price=total_price,
             guest_count=request.guest_count,
             verification_code=verification_code,
             special_requests=request.special_requests,
@@ -52,25 +53,29 @@ class CreateBookingUseCase:
 
         await self._booking_repo.create(booking)
 
-        wallet = await self._wallet_repo.get_by_owner(owner_id)
-        wallet.hold(total_price)
-        await self._wallet_repo.update(wallet)
+        guest_wallet = await self._wallet_repo.get_by_user_id(guest_id)
+        if not guest_wallet:
+            guest_wallet = await self._wallet_repo.create_for_user(guest_id)
+        guest_wallet.hold(total_price)
+        await self._wallet_repo.update(guest_wallet)
 
         transaction = Transaction.create(
-            wallet_id=wallet.id,
-            booking_id=booking.id,
+            wallet_id=guest_wallet.id,
             amount=total_price,
-            type=TransactionType.HOLD,
+            tx_type=TransactionType.HOLD,
+            booking_id=booking.id,
         )
         await self._wallet_repo.add_transaction(transaction)
 
         return BookingResponse(
             id=str(booking.id),
-            property_id=str(booking.property_id),
+            service_type=booking.service_type,
+            service_id=str(booking.service_id) if booking.service_id else None,
+            property_id=str(booking.property_id) if booking.property_id else None,
             guest_id=str(booking.guest_id),
             owner_id=str(booking.owner_id),
-            check_in=booking.check_in.isoformat(),
-            check_out=booking.check_out.isoformat(),
+            check_in=booking.check_in.isoformat() if booking.check_in else None,
+            check_out=booking.check_out.isoformat() if booking.check_out else None,
             total_price=float(booking.total_price),
             status=booking.status,
             guest_count=booking.guest_count,

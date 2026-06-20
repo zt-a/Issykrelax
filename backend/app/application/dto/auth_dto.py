@@ -18,6 +18,14 @@ class RegisterOwnerRequest(BaseModel):
     business_phone: str | None = None
 
 
+class RegisterProviderRequest(BaseModel):
+    email: EmailStr
+    password: str
+    full_name: str
+    phone: str | None = None
+    role_slug: str
+
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
@@ -41,6 +49,11 @@ class UpdateProfileRequest(BaseModel):
 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 
 
 class ChangePasswordRequest(BaseModel):

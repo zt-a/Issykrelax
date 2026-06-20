@@ -1,26 +1,18 @@
-import { apiRequest } from "./api";
+import { apiRequest, buildQueryString } from "./api";
 import type { PropertyResponse, PropertyListResponse, BookingListResponse, WalletResponse } from "../types/api";
 
 export async function getOwnerProperties(params?: {
   offset?: number;
   limit?: number;
 }): Promise<PropertyListResponse> {
-  const search = new URLSearchParams();
-  if (params?.offset !== undefined) search.set("offset", String(params.offset));
-  if (params?.limit !== undefined) search.set("limit", String(params.limit));
-  const qs = search.toString();
-  return apiRequest<PropertyListResponse>(`/owner/properties${qs ? `?${qs}` : ""}`);
+  return apiRequest<PropertyListResponse>(`/owner/properties${buildQueryString(params)}`);
 }
 
 export async function getOwnerBookings(params?: {
   offset?: number;
   limit?: number;
 }): Promise<BookingListResponse> {
-  const search = new URLSearchParams();
-  if (params?.offset !== undefined) search.set("offset", String(params.offset));
-  if (params?.limit !== undefined) search.set("limit", String(params.limit));
-  const qs = search.toString();
-  return apiRequest<BookingListResponse>(`/owner/bookings${qs ? `?${qs}` : ""}`);
+  return apiRequest<BookingListResponse>(`/owner/bookings${buildQueryString(params)}`);
 }
 
 export async function getOwnerWallet(): Promise<WalletResponse> {

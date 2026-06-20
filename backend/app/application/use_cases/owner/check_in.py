@@ -3,6 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from app.application.dto.booking_dto import BookingResponse
+from app.domain.entities.booking import BookingStatus
 from app.domain.entities.transaction import Transaction, TransactionType
 from app.domain.interfaces.repositories.booking_repository import BookingRepository
 from app.domain.interfaces.repositories.property_repository import PropertyRepository
@@ -25,7 +26,7 @@ class CheckInUseCase:
         if not booking:
             raise ValueError("Invalid verification code")
 
-        if booking.status != "paid":
+        if booking.status != BookingStatus.PAID:
             raise ValueError("Booking cannot be checked in")
 
         property = await self._property_repo.get_by_id(booking.property_id)
@@ -38,15 +39,23 @@ class CheckInUseCase:
         if both_confirmed:
             booking.mark_checked_in()
             await self._property_repo.add_rating_points(booking.property_id, 1)
-            wallet = await self._wallet_repo.get_by_owner(owner_id)
-            wallet.release(booking.total_price)
-            await self._wallet_repo.update(wallet)
+
+            guest_wallet = await self._wallet_repo.get_by_user_id(booking.guest_id)
+            if guest_wallet:
+                guest_wallet.settle(booking.total_price)
+                await self._wallet_repo.update(guest_wallet)
+
+            provider_wallet = await self._wallet_repo.get_by_user_id(owner_id)
+            if not provider_wallet:
+                provider_wallet = await self._wallet_repo.create_for_user(owner_id)
+            provider_wallet.receive(booking.total_price)
+            await self._wallet_repo.update(provider_wallet)
 
             transaction = Transaction.create(
-                wallet_id=wallet.id,
-                booking_id=booking.id,
+                wallet_id=provider_wallet.id,
                 amount=booking.total_price,
-                type=TransactionType.RELEASE,
+                tx_type=TransactionType.RELEASE,
+                booking_id=booking.id,
             )
             await self._wallet_repo.add_transaction(transaction)
 
@@ -54,11 +63,13 @@ class CheckInUseCase:
 
         return BookingResponse(
             id=str(booking.id),
-            property_id=str(booking.property_id),
+            service_type=booking.service_type,
+            service_id=str(booking.service_id) if booking.service_id else None,
+            property_id=str(booking.property_id) if booking.property_id else None,
             guest_id=str(booking.guest_id),
             owner_id=str(booking.owner_id),
-            check_in=booking.check_in.isoformat(),
-            check_out=booking.check_out.isoformat(),
+            check_in=booking.check_in.isoformat() if booking.check_in else None,
+            check_out=booking.check_out.isoformat() if booking.check_out else None,
             total_price=float(booking.total_price),
             status=booking.status,
             guest_count=booking.guest_count,
