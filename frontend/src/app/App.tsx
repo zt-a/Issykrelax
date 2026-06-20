@@ -142,7 +142,7 @@ function AppContent() {
   return (
     <div className="min-h-screen" style={{ fontFamily: "var(--font-sans)", background: "var(--background)" }}>
       <LayoutSEO />
-      {showNav && <Navigation currentPage={currentPage} />}
+      {showNav && <Navigation currentPage={currentPage} onNavigate={navigate} />}
       <Toaster position="top-right" richColors />
       <main className="pb-16 md:pb-0">
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: "var(--lake-blue)" }} /></div>}>
