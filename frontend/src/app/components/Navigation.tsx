@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Globe, ChevronDown, User, Heart, Bell, LogOut, Settings, LayoutDashboard, Home, Search, Info, MessageSquare, LogIn, Plus, Menu, Shield, Car, Compass, Dumbbell, Utensils, Wallet, Mountain, Backpack, Ellipsis, Building2, Languages } from "lucide-react";
 import logotip from "@/assets/logo.png";
 import { toast } from "sonner";
@@ -26,9 +26,59 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout, hasRole } = useAuth();
+  const navRef = useRef<HTMLDivElement>(null);
+  const onNavigateRef = useRef(onNavigate);
+  onNavigateRef.current = onNavigate;
 
   useEffect(() => {
     getCategories().then(setCategories).catch(() => toast.error("Ошибка загрузки категорий"));
+  }, []);
+
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+
+    const handler = (e: MouseEvent) => {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const link = (e.target as HTMLElement).closest("a");
+      if (!link) return;
+      if (!el.contains(link)) return;
+
+      const href = link.getAttribute("href");
+      if (!href || href.startsWith("http") || href.startsWith("//") || href.startsWith("#") || href.startsWith("tel:") || href.startsWith("mailto:")) return;
+      if (link.getAttribute("target") === "_blank") return;
+      if (link.getAttribute("download") != null) return;
+
+      e.preventDefault();
+
+      const pathname = href.startsWith("/") ? href : `/${href}`;
+      const page = getCurrentPage(pathname);
+
+      let params: NavParams = {};
+      if (page === "category" && pathname.startsWith("/category/")) {
+        params = { category_slug: pathname.split("/")[2] };
+      } else if (page === "city" && pathname.startsWith("/city/")) {
+        params = { city_slug: pathname.split("/")[2] };
+      } else if (page === "property" && pathname.startsWith("/property/")) {
+        params = { property_id: pathname.split("/")[2] };
+      } else if (page === "activity" && pathname.startsWith("/activity/")) {
+        params = { activity_id: pathname.split("/")[2] };
+      } else if (page === "transfer" && pathname.startsWith("/transfer/")) {
+        params = { transfer_id: pathname.split("/")[2] };
+      } else if (page === "tour" && pathname.startsWith("/tour/")) {
+        params = { tour_id: pathname.split("/")[2] };
+      } else if (page === "tour-package" && pathname.startsWith("/tour-package/")) {
+        params = { pkg_id: pathname.split("/")[2] };
+      } else if (page === "restaurant" && pathname.startsWith("/restaurant/")) {
+        params = { restaurant_id: pathname.split("/")[2] };
+      }
+
+      onNavigateRef.current(page, params);
+    };
+
+    el.addEventListener("click", handler, false);
+    return () => el.removeEventListener("click", handler, false);
   }, []);
 
   const navLinks = [
@@ -66,46 +116,8 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
     return currentPage === href.slice(1);
   };
 
-  const handleNavClick = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-
-    const link = (e.target as HTMLElement).closest("a");
-    if (!link) return;
-
-    const href = link.getAttribute("href");
-    if (!href || href.startsWith("http") || href.startsWith("//") || href.startsWith("#") || href.startsWith("tel:") || href.startsWith("mailto:")) return;
-    if (link.getAttribute("target") === "_blank") return;
-    if (link.getAttribute("download") != null) return;
-
-    e.preventDefault();
-
-    const pathname = href.startsWith("/") ? href : `/${href}`;
-    const page = getCurrentPage(pathname);
-
-    let params: NavParams = {};
-    if (page === "category" && pathname.startsWith("/category/")) {
-      params = { category_slug: pathname.split("/")[2] };
-    } else if (page === "city" && pathname.startsWith("/city/")) {
-      params = { city_slug: pathname.split("/")[2] };
-    } else if (page === "property" && pathname.startsWith("/property/")) {
-      params = { property_id: pathname.split("/")[2] };
-    } else if (page === "activity" && pathname.startsWith("/activity/")) {
-      params = { activity_id: pathname.split("/")[2] };
-    } else if (page === "transfer" && pathname.startsWith("/transfer/")) {
-      params = { transfer_id: pathname.split("/")[2] };
-    } else if (page === "tour" && pathname.startsWith("/tour/")) {
-      params = { tour_id: pathname.split("/")[2] };
-    } else if (page === "tour-package" && pathname.startsWith("/tour-package/")) {
-      params = { pkg_id: pathname.split("/")[2] };
-    } else if (page === "restaurant" && pathname.startsWith("/restaurant/")) {
-      params = { restaurant_id: pathname.split("/")[2] };
-    }
-
-    onNavigate(page, params);
-  }, [onNavigate]);
-
   return (
-    <div onClick={handleNavClick}>
+    <div ref={navRef}>
       {/* Desktop Header */}
       <nav style={{ background: "var(--background)", borderBottom: "1px solid var(--border)" }} className="hidden md:block sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
