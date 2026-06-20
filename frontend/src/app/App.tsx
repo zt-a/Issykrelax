@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense, useRef } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Navigation } from "./components/Navigation";
@@ -31,6 +31,7 @@ import { TourPackageDetailPage } from "./components/TourPackageDetailPage";
 import { RestaurantDetailPage } from "./components/RestaurantDetailPage";
 import { Toaster } from "./components/ui/sonner";
 import { SSRDataContext, useSSRData } from "./lib/SSRDataContext";
+import { getCurrentPage } from "./lib/navigate";
 
 const AdminPanel = lazy(() => import("./components/AdminPanel").then((m) => ({ default: m.AdminPanel })));
 const ModeratorDashboard = lazy(() => import("./components/ModeratorDashboard").then((m) => ({ default: m.ModeratorDashboard })));
@@ -112,6 +113,43 @@ function AppContent() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const link = (e.target as HTMLElement).closest("a");
+      if (!link) return;
+
+      const href = link.getAttribute("href");
+      if (!href || href.startsWith("http") || href.startsWith("//") || href.startsWith("#") || href.startsWith("tel:") || href.startsWith("mailto:")) return;
+      if (link.getAttribute("target") === "_blank") return;
+      if (link.getAttribute("download") != null) return;
+
+      e.preventDefault();
+
+      const pathname = href.startsWith("/") ? href : `/${href}`;
+      const page = getCurrentPage(pathname);
+
+      let params: NavParams = {};
+      if (page === "category" && pathname.startsWith("/category/")) { params = { category_slug: pathname.split("/")[2] }; }
+      else if (page === "city" && pathname.startsWith("/city/")) { params = { city_slug: pathname.split("/")[2] }; }
+      else if (page === "property" && pathname.startsWith("/property/")) { params = { property_id: pathname.split("/")[2] }; }
+      else if (page === "activity" && pathname.startsWith("/activity/")) { params = { activity_id: pathname.split("/")[2] }; }
+      else if (page === "transfer" && pathname.startsWith("/transfer/")) { params = { transfer_id: pathname.split("/")[2] }; }
+      else if (page === "tour" && pathname.startsWith("/tour/")) { params = { tour_id: pathname.split("/")[2] }; }
+      else if (page === "tour-package" && pathname.startsWith("/tour-package/")) { params = { pkg_id: pathname.split("/")[2] }; }
+      else if (page === "restaurant" && pathname.startsWith("/restaurant/")) { params = { restaurant_id: pathname.split("/")[2] }; }
+
+      navigateRef.current(page, params);
+    };
+
+    document.addEventListener("click", handler, true);
+    return () => document.removeEventListener("click", handler, true);
+  }, []);
+
   const navigate = (page: string, extra?: NavParams) => {
     let path: string;
     if (page === "property" && extra?.property_id) path = `/property/${extra.property_id}`;
@@ -142,7 +180,7 @@ function AppContent() {
   return (
     <div className="min-h-screen" style={{ fontFamily: "var(--font-sans)", background: "var(--background)" }}>
       <LayoutSEO />
-      {showNav && <Navigation currentPage={currentPage} onNavigate={navigate} />}
+      {showNav && <Navigation currentPage={currentPage} />}
       <Toaster position="top-right" richColors />
       <main className="pb-16 md:pb-0">
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: "var(--lake-blue)" }} /></div>}>
