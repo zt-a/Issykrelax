@@ -92,7 +92,7 @@ services:
     volumes:
       - ./frontend:/app
       - frontend-dist:/app/dist
-    command: sh -c "npm ci && npm run build"
+    command: sh -c "npm i -g pnpm@9 && pnpm install --frozen-lockfile && pnpm run build"
     profiles:
       - build
 
