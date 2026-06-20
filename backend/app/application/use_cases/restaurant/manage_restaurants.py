@@ -40,7 +40,7 @@ class CreateRestaurantUseCase:
         )
         await self._restaurant_repo.create_restaurant(restaurant)
 
-        return self._restaurant_to_dict(restaurant)
+        return _restaurant_to_dict(restaurant)
 
 
 class UpdateRestaurantUseCase:
@@ -96,7 +96,7 @@ class UpdateRestaurantUseCase:
         restaurant.updated_at = datetime.now()
         await self._restaurant_repo.update_restaurant(restaurant)
 
-        return self._restaurant_to_dict(restaurant)
+        return _restaurant_to_dict(restaurant)
 
 
 class ListMyRestaurantsUseCase:
@@ -109,7 +109,7 @@ class ListMyRestaurantsUseCase:
             return {"items": [], "total": 0}
 
         items, total = await self._restaurant_repo.get_restaurants_by_partner(profile.id, offset=offset, limit=limit)
-        return {"items": [self._restaurant_to_dict(r) for r in items], "total": total}
+        return {"items": [_restaurant_to_dict(r) for r in items], "total": total}
 
 
 class ListRestaurantsUseCase:
@@ -119,7 +119,7 @@ class ListRestaurantsUseCase:
     async def execute(self, city_id: str | None = None, offset: int = 0, limit: int = 20) -> dict:
         city_uuid = UUID(city_id) if city_id else None
         items, total = await self._restaurant_repo.list_restaurants(city_id=city_uuid, offset=offset, limit=limit)
-        return {"items": [self._restaurant_to_dict(r) for r in items], "total": total}
+        return {"items": [_restaurant_to_dict(r) for r in items], "total": total}
 
 
 class GetRestaurantUseCase:
@@ -130,7 +130,7 @@ class GetRestaurantUseCase:
         restaurant = await self._restaurant_repo.get_restaurant_by_id(restaurant_id)
         if not restaurant:
             raise ValueError("Restaurant not found")
-        return self._restaurant_to_dict(restaurant)
+        return _restaurant_to_dict(restaurant)
 
 
 class DeleteRestaurantUseCase:
@@ -161,7 +161,7 @@ class GetPartnerDashboardUseCase:
             return {"profile": None, "restaurants_count": 0, "active_restaurants": 0}
 
         items, _ = await self._restaurant_repo.get_restaurants_by_partner(profile.id, limit=1000)
-        restaurants = [self._restaurant_to_dict(r) for r in items]
+        restaurants = [_restaurant_to_dict(r) for r in items]
         active = [r for r in restaurants if r["is_active"]]
 
         return {
@@ -177,20 +177,20 @@ class GetPartnerDashboardUseCase:
             "restaurants": restaurants,
         }
 
-    def _restaurant_to_dict(self, r: RestaurantEntity) -> dict:
-        return {
-            "id": str(r.id),
-            "partner_id": str(r.partner_id),
-            "name": r.name,
-            "description": r.description,
-            "cuisine_type": r.cuisine_type,
-            "address": r.address,
-            "phone": r.phone,
-            "price_range": r.price_range,
-            "opening_hours": r.opening_hours,
-            "city_id": str(r.city_id) if r.city_id else None,
-            "status": r.status,
-            "is_active": r.is_active,
-            "created_at": r.created_at.isoformat(),
-            "updated_at": r.updated_at.isoformat(),
-        }
+def _restaurant_to_dict(r: RestaurantEntity) -> dict:
+    return {
+        "id": str(r.id),
+        "partner_id": str(r.partner_id),
+        "name": r.name,
+        "description": r.description,
+        "cuisine_type": r.cuisine_type,
+        "address": r.address,
+        "phone": r.phone,
+        "price_range": r.price_range,
+        "opening_hours": r.opening_hours,
+        "city_id": str(r.city_id) if r.city_id else None,
+        "status": r.status,
+        "is_active": r.is_active,
+        "created_at": r.created_at.isoformat(),
+        "updated_at": r.updated_at.isoformat(),
+    }

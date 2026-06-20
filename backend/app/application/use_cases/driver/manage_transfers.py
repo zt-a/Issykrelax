@@ -45,7 +45,7 @@ class CreateTransferUseCase:
         )
         await self._driver_repo.create_transfer(transfer)
 
-        return self._transfer_to_dict(transfer)
+        return _transfer_to_dict(transfer)
 
 
 class UpdateTransferUseCase:
@@ -104,7 +104,7 @@ class UpdateTransferUseCase:
         transfer.updated_at = datetime.now()
         await self._driver_repo.update_transfer(transfer)
 
-        return self._transfer_to_dict(transfer)
+        return _transfer_to_dict(transfer)
 
 
 class ListMyTransfersUseCase:
@@ -117,7 +117,7 @@ class ListMyTransfersUseCase:
             return {"items": [], "total": 0}
 
         items, total = await self._driver_repo.get_transfers_by_driver(profile.id, offset=offset, limit=limit)
-        return {"items": [self._transfer_to_dict(t) for t in items], "total": total}
+        return {"items": [_transfer_to_dict(t) for t in items], "total": total}
 
 
 class ListTransfersUseCase:
@@ -127,7 +127,7 @@ class ListTransfersUseCase:
     async def execute(self, city_id: str | None = None, offset: int = 0, limit: int = 20) -> dict:
         city_uuid = UUID(city_id) if city_id else None
         items, total = await self._driver_repo.list_transfers(city_id=city_uuid, offset=offset, limit=limit)
-        return {"items": [self._transfer_to_dict(t) for t in items], "total": total}
+        return {"items": [_transfer_to_dict(t) for t in items], "total": total}
 
 
 class GetTransferUseCase:
@@ -138,7 +138,7 @@ class GetTransferUseCase:
         transfer = await self._driver_repo.get_transfer_by_id(transfer_id)
         if not transfer:
             raise ValueError("Transfer not found")
-        return self._transfer_to_dict(transfer)
+        return _transfer_to_dict(transfer)
 
 
 class DeleteTransferUseCase:
@@ -169,7 +169,7 @@ class GetDriverDashboardUseCase:
             return {"profile": None, "transfers_count": 0, "active_transfers": 0}
 
         items, _ = await self._driver_repo.get_transfers_by_driver(profile.id, limit=1000)
-        transfers = [self._transfer_to_dict(t) for t in items]
+        transfers = [_transfer_to_dict(t) for t in items]
         active = [t for t in transfers if t["is_active"]]
 
         return {
@@ -185,22 +185,22 @@ class GetDriverDashboardUseCase:
             "transfers": transfers,
         }
 
-    def _transfer_to_dict(self, t: TransferEntity) -> dict:
-        return {
-            "id": str(t.id),
-            "driver_id": str(t.driver_id),
-            "title": t.title,
-            "description": t.description,
-            "from_location": t.from_location,
-            "to_location": t.to_location,
-            "price": float(t.price),
-            "currency": t.currency,
-            "max_passengers": t.max_passengers,
-            "vehicle_type": t.vehicle_type,
-            "duration_minutes": t.duration_minutes,
-            "status": t.status,
-            "is_active": t.is_active,
-            "city_id": str(t.city_id) if t.city_id else None,
-            "created_at": t.created_at.isoformat(),
-            "updated_at": t.updated_at.isoformat(),
-        }
+def _transfer_to_dict(t: TransferEntity) -> dict:
+    return {
+        "id": str(t.id),
+        "driver_id": str(t.driver_id),
+        "title": t.title,
+        "description": t.description,
+        "from_location": t.from_location,
+        "to_location": t.to_location,
+        "price": float(t.price),
+        "currency": t.currency,
+        "max_passengers": t.max_passengers,
+        "vehicle_type": t.vehicle_type,
+        "duration_minutes": t.duration_minutes,
+        "status": t.status,
+        "is_active": t.is_active,
+        "city_id": str(t.city_id) if t.city_id else None,
+        "created_at": t.created_at.isoformat(),
+        "updated_at": t.updated_at.isoformat(),
+    }

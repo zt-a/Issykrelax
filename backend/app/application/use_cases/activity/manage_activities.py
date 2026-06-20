@@ -41,7 +41,7 @@ class CreateActivityUseCase:
         )
         await self._activity_repo.create_activity(activity)
 
-        return self._activity_to_dict(activity)
+        return _activity_to_dict(activity)
 
 
 class UpdateActivityUseCase:
@@ -94,7 +94,7 @@ class UpdateActivityUseCase:
         activity.updated_at = datetime.now()
         await self._activity_repo.update_activity(activity)
 
-        return self._activity_to_dict(activity)
+        return _activity_to_dict(activity)
 
 
 class ListMyActivitiesUseCase:
@@ -107,7 +107,7 @@ class ListMyActivitiesUseCase:
             return {"items": [], "total": 0}
 
         items, total = await self._activity_repo.get_activities_by_provider(profile.id, offset=offset, limit=limit)
-        return {"items": [self._activity_to_dict(t) for t in items], "total": total}
+        return {"items": [_activity_to_dict(t) for t in items], "total": total}
 
 
 class ListActivitiesUseCase:
@@ -117,7 +117,7 @@ class ListActivitiesUseCase:
     async def execute(self, city_id: str | None = None, offset: int = 0, limit: int = 20) -> dict:
         city_uuid = UUID(city_id) if city_id else None
         items, total = await self._activity_repo.list_activities(city_id=city_uuid, offset=offset, limit=limit)
-        return {"items": [self._activity_to_dict(t) for t in items], "total": total}
+        return {"items": [_activity_to_dict(t) for t in items], "total": total}
 
 
 class GetActivityUseCase:
@@ -128,7 +128,7 @@ class GetActivityUseCase:
         activity = await self._activity_repo.get_activity_by_id(activity_id)
         if not activity:
             raise ValueError("Activity not found")
-        return self._activity_to_dict(activity)
+        return _activity_to_dict(activity)
 
 
 class DeleteActivityUseCase:
@@ -159,7 +159,7 @@ class GetActivityDashboardUseCase:
             return {"profile": None, "activities_count": 0, "active_activities": 0}
 
         items, _ = await self._activity_repo.get_activities_by_provider(profile.id, limit=1000)
-        activities = [self._activity_to_dict(t) for t in items]
+        activities = [_activity_to_dict(t) for t in items]
         active = [t for t in activities if t["is_active"]]
 
         return {
@@ -174,20 +174,21 @@ class GetActivityDashboardUseCase:
             "activities": activities,
         }
 
-    def _activity_to_dict(self, a: ActivityEntity) -> dict:
-        return {
-            "id": str(a.id),
-            "provider_id": str(a.provider_id),
-            "title": a.title,
-            "description": a.description,
-            "price": float(a.price),
-            "currency": a.currency,
-            "max_participants": a.max_participants,
-            "duration_minutes": a.duration_minutes,
-            "location": a.location,
-            "status": a.status,
-            "is_active": a.is_active,
-            "city_id": str(a.city_id) if a.city_id else None,
-            "created_at": a.created_at.isoformat(),
-            "updated_at": a.updated_at.isoformat(),
-        }
+
+def _activity_to_dict(a: ActivityEntity) -> dict:
+    return {
+        "id": str(a.id),
+        "provider_id": str(a.provider_id),
+        "title": a.title,
+        "description": a.description,
+        "price": float(a.price),
+        "currency": a.currency,
+        "max_participants": a.max_participants,
+        "duration_minutes": a.duration_minutes,
+        "location": a.location,
+        "status": a.status,
+        "is_active": a.is_active,
+        "city_id": str(a.city_id) if a.city_id else None,
+        "created_at": a.created_at.isoformat(),
+        "updated_at": a.updated_at.isoformat(),
+    }

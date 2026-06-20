@@ -31,7 +31,7 @@ services:
       - relax-net
     ports:
       - "6379:6379"
-    command: redis-server
+    command: redis-server --requirepass ${REDIS_PASSWORD:?err}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -47,6 +47,7 @@ services:
       - relax-net
     environment:
       POSTGRES_HOST: postgres
+      CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
     depends_on:
       postgres:
         condition: service_healthy

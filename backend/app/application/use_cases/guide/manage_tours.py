@@ -43,7 +43,7 @@ class CreateTourUseCase:
         )
         await self._guide_repo.create_tour(tour)
 
-        return self._tour_to_dict(tour)
+        return _tour_to_dict(tour)
 
 
 class UpdateTourUseCase:
@@ -99,7 +99,7 @@ class UpdateTourUseCase:
         tour.updated_at = datetime.now()
         await self._guide_repo.update_tour(tour)
 
-        return self._tour_to_dict(tour)
+        return _tour_to_dict(tour)
 
 
 class ListMyToursUseCase:
@@ -112,7 +112,7 @@ class ListMyToursUseCase:
             return {"items": [], "total": 0}
 
         items, total = await self._guide_repo.get_tours_by_guide(profile.id, offset=offset, limit=limit)
-        return {"items": [self._tour_to_dict(t) for t in items], "total": total}
+        return {"items": [_tour_to_dict(t) for t in items], "total": total}
 
 
 class ListToursUseCase:
@@ -122,7 +122,7 @@ class ListToursUseCase:
     async def execute(self, city_id: str | None = None, offset: int = 0, limit: int = 20) -> dict:
         city_uuid = UUID(city_id) if city_id else None
         items, total = await self._guide_repo.list_tours(city_id=city_uuid, offset=offset, limit=limit)
-        return {"items": [self._tour_to_dict(t) for t in items], "total": total}
+        return {"items": [_tour_to_dict(t) for t in items], "total": total}
 
 
 class GetTourUseCase:
@@ -133,7 +133,7 @@ class GetTourUseCase:
         tour = await self._guide_repo.get_tour_by_id(tour_id)
         if not tour:
             raise ValueError("Tour not found")
-        return self._tour_to_dict(tour)
+        return _tour_to_dict(tour)
 
 
 class DeleteTourUseCase:
@@ -164,7 +164,7 @@ class GetGuideDashboardUseCase:
             return {"profile": None, "tours_count": 0, "active_tours": 0}
 
         items, _ = await self._guide_repo.get_tours_by_guide(profile.id, limit=1000)
-        tours = [self._tour_to_dict(t) for t in items]
+        tours = [_tour_to_dict(t) for t in items]
         active = [t for t in tours if t["is_active"]]
 
         return {
@@ -179,21 +179,21 @@ class GetGuideDashboardUseCase:
             "tours": tours,
         }
 
-    def _tour_to_dict(self, t: TourEntity) -> dict:
-        return {
-            "id": str(t.id),
-            "guide_id": str(t.guide_id),
-            "title": t.title,
-            "description": t.description,
-            "price": float(t.price),
-            "currency": t.currency,
-            "duration_days": t.duration_days,
-            "max_guests": t.max_guests,
-            "includes": t.includes,
-            "meeting_point": t.meeting_point,
-            "status": t.status,
-            "is_active": t.is_active,
-            "city_id": str(t.city_id) if t.city_id else None,
-            "created_at": t.created_at.isoformat(),
-            "updated_at": t.updated_at.isoformat(),
-        }
+def _tour_to_dict(t: TourEntity) -> dict:
+    return {
+        "id": str(t.id),
+        "guide_id": str(t.guide_id),
+        "title": t.title,
+        "description": t.description,
+        "price": float(t.price),
+        "currency": t.currency,
+        "duration_days": t.duration_days,
+        "max_guests": t.max_guests,
+        "includes": t.includes,
+        "meeting_point": t.meeting_point,
+        "status": t.status,
+        "is_active": t.is_active,
+        "city_id": str(t.city_id) if t.city_id else None,
+        "created_at": t.created_at.isoformat(),
+        "updated_at": t.updated_at.isoformat(),
+    }

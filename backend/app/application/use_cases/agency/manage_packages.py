@@ -41,7 +41,7 @@ class CreateTourPackageUseCase:
         )
         await self._agency_repo.create_tour_package(pkg)
 
-        return self._pkg_to_dict(pkg)
+        return _pkg_to_dict(pkg)
 
 
 class UpdateTourPackageUseCase:
@@ -94,7 +94,7 @@ class UpdateTourPackageUseCase:
         pkg.updated_at = datetime.now()
         await self._agency_repo.update_tour_package(pkg)
 
-        return self._pkg_to_dict(pkg)
+        return _pkg_to_dict(pkg)
 
 
 class ListMyTourPackagesUseCase:
@@ -107,7 +107,7 @@ class ListMyTourPackagesUseCase:
             return {"items": [], "total": 0}
 
         items, total = await self._agency_repo.get_tour_packages_by_agency(profile.id, offset=offset, limit=limit)
-        return {"items": [self._pkg_to_dict(t) for t in items], "total": total}
+        return {"items": [_pkg_to_dict(t) for t in items], "total": total}
 
 
 class ListTourPackagesUseCase:
@@ -116,7 +116,7 @@ class ListTourPackagesUseCase:
 
     async def execute(self, offset: int = 0, limit: int = 20) -> dict:
         items, total = await self._agency_repo.list_tour_packages(offset=offset, limit=limit)
-        return {"items": [self._pkg_to_dict(t) for t in items], "total": total}
+        return {"items": [_pkg_to_dict(t) for t in items], "total": total}
 
 
 class GetTourPackageUseCase:
@@ -127,7 +127,7 @@ class GetTourPackageUseCase:
         pkg = await self._agency_repo.get_tour_package_by_id(pkg_id)
         if not pkg:
             raise ValueError("Tour package not found")
-        return self._pkg_to_dict(pkg)
+        return _pkg_to_dict(pkg)
 
 
 class DeleteTourPackageUseCase:
@@ -158,7 +158,7 @@ class GetAgencyDashboardUseCase:
             return {"profile": None, "packages_count": 0, "active_packages": 0}
 
         items, _ = await self._agency_repo.get_tour_packages_by_agency(profile.id, limit=1000)
-        packages = [self._pkg_to_dict(t) for t in items]
+        packages = [_pkg_to_dict(t) for t in items]
         active = [t for t in packages if t["is_active"]]
 
         return {
@@ -174,20 +174,20 @@ class GetAgencyDashboardUseCase:
             "packages": packages,
         }
 
-    def _pkg_to_dict(self, p: TourPackageEntity) -> dict:
-        return {
-            "id": str(p.id),
-            "agency_id": str(p.agency_id),
-            "title": p.title,
-            "description": p.description,
-            "price": float(p.price),
-            "currency": p.currency,
-            "duration_days": p.duration_days,
-            "max_guests": p.max_guests,
-            "includes": p.includes,
-            "itinerary": p.itinerary,
-            "status": p.status,
-            "is_active": p.is_active,
-            "created_at": p.created_at.isoformat(),
-            "updated_at": p.updated_at.isoformat(),
-        }
+def _pkg_to_dict(p: TourPackageEntity) -> dict:
+    return {
+        "id": str(p.id),
+        "agency_id": str(p.agency_id),
+        "title": p.title,
+        "description": p.description,
+        "price": float(p.price),
+        "currency": p.currency,
+        "duration_days": p.duration_days,
+        "max_guests": p.max_guests,
+        "includes": p.includes,
+        "itinerary": p.itinerary,
+        "status": p.status,
+        "is_active": p.is_active,
+        "created_at": p.created_at.isoformat(),
+        "updated_at": p.updated_at.isoformat(),
+    }
