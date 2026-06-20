@@ -86,8 +86,8 @@ export function PricingPage({ onNavigate }: PricingPageProps) {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <SEO
-        title="Тарифы для владельцев"
-        description="Разместите объект на IssykRelax. Бесплатный тариф доступен каждому. Премиум-тариф с аналитикой, приоритетной поддержкой и продвижением."
+        title="Тарифы для владельцев жилья — разместите объект на IssykRelax"
+        description="Разместите отель, коттедж, гостевой дом или юрту на IssykRelax — крупнейшем маркетплейсе Иссык-Куля. Бесплатный тариф. Премиум с аналитикой, приоритетом в выдаче, верификацией и продвижением."
         canonical="/pricing"
         jsonLd={breadcrumbSchema([
           { name: "Главная", url: "/" },

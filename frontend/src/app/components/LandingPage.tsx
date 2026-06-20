@@ -79,8 +79,8 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <SEO
-        title="Маркетплейс отдыха на Иссык-Куле"
-        description="IssykRelax — крупнейший маркетплейс отдыха на Иссык-Куле. Бронируйте жильё, отели, коттеджи, туры, рестораны. Лучшие цены, реальные отзывы, мгновенное бронирование."
+        title="Отдых на Иссык-Куле — бронирование жилья, отелей и туров в Кыргызстане"
+        description="IssykRelax — крупнейший маркетплейс отдыха на Иссык-Куле, Кыргызстан. Бронируйте жильё, отели, коттеджи, юрты, туры и рестораны в Чолпон-Ате, Бостери, Кара-Ое. Лучшие цены, реальные отзывы, мгновенное бронирование."
         canonical="/"
         jsonLd={[localBusinessSchema(), searchActionSchema()]}
       />

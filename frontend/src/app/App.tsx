@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Navigation } from "./components/Navigation";
 import { LandingPage } from "./components/LandingPage";
+import { LayoutSEO } from "./components/LayoutSEO";
 import { SearchResults } from "./components/SearchResults";
 import { PropertyDetails } from "./components/PropertyDetails";
 import { RestaurantsPage } from "./components/RestaurantsPage";
@@ -110,6 +110,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen" style={{ fontFamily: "var(--font-sans)", background: "var(--background)" }}>
+      <LayoutSEO />
       {showNav && (
         <Navigation
           currentPage={currentPage}
@@ -140,10 +141,8 @@ function AppContent() {
 
 export default function App() {
   return (
-    <HelmetProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </HelmetProvider>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

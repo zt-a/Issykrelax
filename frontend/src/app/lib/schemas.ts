@@ -1,4 +1,44 @@
 const BASE_URL = "https://issykrelax.kg";
+const IMAGE_URL = `${BASE_URL}/logo.png`;
+
+export function organizationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "IssykRelax",
+    description: "Крупнейший маркетплейс отдыха на Иссык-Куле. Бронирование жилья, отелей, коттеджей, туров и ресторанов.",
+    url: BASE_URL,
+    logo: IMAGE_URL,
+    image: IMAGE_URL,
+    sameAs: [
+      "https://issykrelax.kg",
+    ],
+    address: {
+      "@type": "PostalAddress",
+      addressRegion: "Issyk-Kul",
+      addressCountry: "KG",
+    },
+  };
+}
+
+export function websiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    url: BASE_URL,
+    name: "IssykRelax",
+    description: "Крупнейший маркетплейс отдыха на Иссык-Куле. Бронирование жилья, отелей, коттеджей, туров и ресторанов.",
+    inLanguage: "ru",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${BASE_URL}/search?query={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
 
 export function localBusinessSchema() {
   return {
@@ -7,7 +47,7 @@ export function localBusinessSchema() {
     name: "IssykRelax",
     description: "Крупнейший маркетплейс отдыха на Иссык-Куле. Бронирование жилья, отелей, коттеджей, туров и ресторанов.",
     url: BASE_URL,
-    image: `${BASE_URL}/logotip.png`,
+    image: IMAGE_URL,
     telephone: "+996XXXXXXXXX",
     address: {
       "@type": "PostalAddress",
@@ -37,7 +77,7 @@ export function vacationRentalSchema(property: {
     name: property.title,
     description: property.description,
     url: `${BASE_URL}/property/${property.id}`,
-    image: property.image || `${BASE_URL}/logotip.png`,
+    image: property.image || IMAGE_URL,
     priceRange: `${property.price} KGS`,
     address: {
       "@type": "PostalAddress",

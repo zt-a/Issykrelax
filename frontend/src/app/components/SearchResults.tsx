@@ -199,8 +199,8 @@ export function SearchResults({ onNavigate, params }: SearchResultsProps) {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <SEO
-        title="Поиск жилья на Иссык-Куле"
-        description="Найдите идеальное жильё на Иссык-Куле: отели, коттеджи, юрты, гостевые дома. Сравните цены, читайте отзывы, бронируйте онлайн."
+        title="Поиск и бронирование жилья на Иссык-Куле — отели, коттеджи, юрты"
+        description="Найдите идеальное жильё на Иссык-Куле, Кыргызстан: отели, коттеджи, юрты, гостевые дома, курорты. Сравните цены на проживание в Чолпон-Ате, Бостери, Кара-Ое. Читайте отзывы, бронируйте онлайн."
         canonical="/search"
         jsonLd={breadcrumbSchema([
           { name: "Главная", url: "/" },

@@ -38,8 +38,8 @@ export function FeedbackPage({ onNavigate }: FeedbackPageProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
       <SEO
-        title="Обратная связь"
-        description="Свяжитесь с командой IssykRelax. Задайте вопрос, оставьте отзыв или предложение. Мы всегда на связи!"
+        title="Контакты и обратная связь — IssykRelax, Иссык-Куль"
+        description="Свяжитесь с командой IssykRelax — крупнейшего маркетплейса отдыха на Иссык-Куле, Кыргызстан. Задайте вопрос, оставьте отзыв или предложение. Email, телефон, адрес в Чолпон-Ате."
         canonical="/feedback"
         jsonLd={breadcrumbSchema([
           { name: "Главная", url: "/" },

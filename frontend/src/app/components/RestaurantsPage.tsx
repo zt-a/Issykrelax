@@ -40,8 +40,8 @@ export function RestaurantsPage({ onNavigate }: RestaurantsPageProps) {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <SEO
-        title="Рестораны Иссык-Куля"
-        description="Лучшие рестораны, кафе и столовые на Иссык-Куле. Кыргызская, средиземноморская, восточная кухня. Бронируйте столики онлайн."
+        title="Рестораны и кафе на Иссык-Куле — где поесть в Чолпон-Ате, Бостери"
+        description="Лучшие рестораны, кафе и столовые на Иссык-Куле, Кыргызстан. Кыргызская, средиземноморская, восточная, мясная, вегетарианская кухня в Чолпон-Ате, Бостери, Тамчы. Бронируйте столики онлайн."
         canonical="/restaurants"
         jsonLd={breadcrumbSchema([
           { name: "Главная", url: "/" },

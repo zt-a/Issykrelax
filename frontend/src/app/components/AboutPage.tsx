@@ -17,8 +17,8 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
       <SEO
-        title="О нас"
-        description="IssykRelax — крупнейший маркетплейс отдыха на Иссык-Куле. Узнайте, как мы помогаем путешественникам находить лучшие варианты и бронировать онлайн."
+        title="О компании IssykRelax — маркетплейс отдыха на Иссык-Куле"
+        description="IssykRelax — крупнейший маркетплейс отдыха на Иссык-Куле, Кыргызстан. Узнайте, как мы помогаем путешественникам находить лучшие варианты жилья, туров, ресторанов и бронировать онлайн."
         canonical="/about"
         jsonLd={breadcrumbSchema([
           { name: "Главная", url: "/" },
