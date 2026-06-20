@@ -14,6 +14,13 @@ import { PricingPage } from "./components/PricingPage";
 import { AdminPanel } from "./components/AdminPanel";
 import { AboutPage } from "./components/AboutPage";
 import { FeedbackPage } from "./components/FeedbackPage";
+import { CityPage } from "./components/CityPage";
+import { CategoryPage } from "./components/CategoryPage";
+import { LoginPage } from "./components/LoginPage";
+import { RegisterPage } from "./components/RegisterPage";
+import { PrivacyPage } from "./components/PrivacyPage";
+import { TermsPage } from "./components/TermsPage";
+import { FaqPage } from "./components/FaqPage";
 import { Toaster } from "./components/ui/sonner";
 
 export type Page =
@@ -28,13 +35,22 @@ export type Page =
   | "pricing"
   | "admin"
   | "about"
-  | "feedback";
+  | "feedback"
+  | "city"
+  | "category"
+  | "login"
+  | "register"
+  | "privacy"
+  | "terms"
+  | "faq";
 
 export interface NavParams {
   property_id?: string;
   query?: string;
   category_id?: string;
   city_id?: string;
+  city_slug?: string;
+  category_slug?: string;
   check_in?: string;
   check_out?: string;
   guests?: string;
@@ -51,6 +67,14 @@ function parseURL(): { page: Page; params: NavParams } {
   if (path.startsWith("/search")) {
     return { page: "search", params: Object.fromEntries(sp) as NavParams };
   }
+  if (path.startsWith("/city/")) {
+    const slug = path.split("/")[2];
+    return { page: "city", params: { city_slug: slug } };
+  }
+  if (path.startsWith("/category/")) {
+    const slug = path.split("/")[2];
+    return { page: "category", params: { category_slug: slug } };
+  }
   switch (path) {
     case "/dashboard": return { page: "dashboard", params: {} };
     case "/owner-dashboard": return { page: "owner-dashboard", params: {} };
@@ -61,6 +85,11 @@ function parseURL(): { page: Page; params: NavParams } {
     case "/pricing": return { page: "pricing", params: {} };
     case "/about": return { page: "about", params: {} };
     case "/feedback": return { page: "feedback", params: {} };
+    case "/login": return { page: "login", params: {} };
+    case "/register": return { page: "register", params: {} };
+    case "/privacy": return { page: "privacy", params: {} };
+    case "/terms": return { page: "terms", params: {} };
+    case "/faq": return { page: "faq", params: {} };
     default: return { page: "landing", params: {} };
   }
 }
@@ -79,6 +108,10 @@ function AppContent() {
     let path: string;
     if (page === "property" && extra?.property_id) {
       path = `/property/${extra.property_id}`;
+    } else if (page === "city" && extra?.city_slug) {
+      path = `/city/${extra.city_slug}`;
+    } else if (page === "category" && extra?.category_slug) {
+      path = `/category/${extra.category_slug}`;
     } else if (page === "search") {
       const sp = new URLSearchParams();
       if (extra) {
@@ -134,6 +167,13 @@ function AppContent() {
         {currentPage === "admin" && <AdminPanel onNavigate={navigate} />}
         {currentPage === "about" && <AboutPage onNavigate={navigate} />}
         {currentPage === "feedback" && <FeedbackPage onNavigate={navigate} />}
+        {currentPage === "city" && <CityPage onNavigate={navigate} citySlug={navParams.city_slug} />}
+        {currentPage === "category" && <CategoryPage onNavigate={navigate} categorySlug={navParams.category_slug} />}
+        {currentPage === "login" && <LoginPage onNavigate={navigate} />}
+        {currentPage === "register" && <RegisterPage onNavigate={navigate} />}
+        {currentPage === "privacy" && <PrivacyPage onNavigate={navigate} />}
+        {currentPage === "terms" && <TermsPage onNavigate={navigate} />}
+        {currentPage === "faq" && <FaqPage onNavigate={navigate} />}
       </main>
     </div>
   );

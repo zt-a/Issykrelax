@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, MapPin, Calendar, Users, Star, ArrowRight, CheckCircle, ChevronLeft, ChevronRight, Waves, Tent, Hotel, Coffee, BedDouble, Home } from "lucide-react";
+import { Search, MapPin, Star, ArrowRight, CheckCircle, ChevronLeft, ChevronRight, Waves, Tent, Hotel, Coffee, BedDouble, Home } from "lucide-react";
 import logotip from "@/assets/logo.png";
 import { SEO } from "./SEO";
 import { localBusinessSchema, searchActionSchema } from "../lib/schemas";
@@ -35,10 +35,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [featured, setFeatured] = useState<PropertyResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [destination, setDestination] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("2");
+  const [searchQuery, setSearchQuery] = useState("");
   const [destIdx, setDestIdx] = useState(0);
 
   useEffect(() => {
@@ -59,21 +56,17 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
     load();
   }, []);
 
-  function handleSearch() {
-    onNavigate("search", {
-      query: destination || undefined,
-      check_in: checkIn || undefined,
-      check_out: checkOut || undefined,
-      guests: guests || undefined,
-    });
+  function handleSearch(e?: React.FormEvent) {
+    e?.preventDefault();
+    onNavigate("search", { query: searchQuery || undefined });
   }
 
   const cityCounts = [
-    { name: "Чолпон-Ата", count: 0, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop" },
-    { name: "Бостери", count: 0, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80&sat=-30" },
-    { name: "Кара-Ой", count: 0, image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop" },
-    { name: "Чок-Тал", count: 0, image: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=400&h=300&fit=crop" },
-    { name: "Тамчы", count: 0, image: "https://images.unsplash.com/photo-1482192505345-5852bda519bb?w=400&h=300&fit=crop" },
+    { name: "Чолпон-Ата", slug: "cholpon-ata", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop" },
+    { name: "Бостери", slug: "bosteri", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80&sat=-30" },
+    { name: "Кара-Ой", slug: "kara-oy", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop" },
+    { name: "Чок-Тал", slug: "chok-tal", image: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=400&h=300&fit=crop" },
+    { name: "Тамчы", slug: "tamchy", image: "https://images.unsplash.com/photo-1482192505345-5852bda519bb?w=400&h=300&fit=crop" },
   ];
 
   return (
@@ -100,46 +93,37 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             <p className="text-xl text-white/80 max-w-2xl mx-auto">Коттеджи, отели, рестораны, туры и экскурсии — всё в одном месте</p>
           </div>
 
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-2xl p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                <MapPin size={18} style={{ color: "var(--lake-blue)" }} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Куда</div>
-                  <input type="text" placeholder="Чолпон-Ата, Бостери..." value={destination} onChange={(e) => setDestination(e.target.value)} className="w-full text-sm outline-none bg-transparent" style={{ color: "var(--text-primary)" }} />
-                </div>
+          <div className="max-w-3xl mx-auto">
+            <form onSubmit={handleSearch} className="bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-3">
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                <Search size={20} style={{ color: "var(--lake-blue)" }} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Поиск жилья, туров, ресторанов... Чолпон-Ата, коттедж, юрта, пляж..."
+                  className="w-full text-sm outline-none bg-transparent"
+                  style={{ color: "var(--text-primary)" }}
+                />
               </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                <Calendar size={18} style={{ color: "var(--lake-blue)" }} />
-                <div className="flex-1">
-                  <div className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Заезд</div>
-                  <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="w-full text-sm outline-none bg-transparent" style={{ color: "var(--text-primary)" }} />
-                </div>
-              </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                <Calendar size={18} style={{ color: "var(--lake-blue)" }} />
-                <div className="flex-1">
-                  <div className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Выезд</div>
-                  <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="w-full text-sm outline-none bg-transparent" style={{ color: "var(--text-primary)" }} />
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                  <Users size={18} style={{ color: "var(--lake-blue)" }} />
-                  <div className="flex-1">
-                    <div className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Гости</div>
-                    <input type="number" min="1" value={guests} onChange={(e) => setGuests(e.target.value)} className="w-full text-sm outline-none bg-transparent" style={{ color: "var(--text-primary)" }} />
-                  </div>
-                </div>
-                <button onClick={handleSearch} className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-transform hover:scale-105" style={{ background: "linear-gradient(135deg, var(--lake-blue), var(--turquoise))" }}>
-                  <Search size={20} color="white" />
-                </button>
-              </div>
-            </div>
+              <button
+                type="submit"
+                className="px-8 py-3 rounded-xl font-semibold text-sm text-white shadow-lg transition-transform hover:scale-105"
+                style={{ background: "linear-gradient(135deg, var(--lake-blue), var(--turquoise))" }}
+              >
+                Найти
+              </button>
+            </form>
 
             <div className="flex items-center gap-3 mt-4 flex-wrap justify-center">
               {["Пляж", "Юрты", "Горы", "Семьям", "С питанием", "SPA"].map((tag) => (
-                <button key={tag} onClick={handleSearch} className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors" style={{ background: "rgba(255,255,255,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)" }}>
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => onNavigate("search", { query: tag })}
+                  className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+                  style={{ background: "rgba(255,255,255,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)" }}
+                >
                   {tag}
                 </button>
               ))}
@@ -196,14 +180,15 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             {cityCounts.map((dest) => (
               <button
                 key={dest.name}
-                onClick={() => onNavigate("search", { query: dest.name })}
+                onClick={() => onNavigate("city", { city_slug: dest.slug })}
                 className="group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1"
                 style={{ aspectRatio: "3/4" }}
               >
-                <img src={dest.image} alt={dest.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={dest.image} alt={`${dest.name} на Иссык-Куле`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(15,28,46,0.8) 0%, transparent 60%)" }} />
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
                   <div className="text-white font-bold text-sm md:text-base">{dest.name}</div>
+                  <div className="text-white/60 text-xs mt-0.5">Иссык-Куль, Кыргызстан</div>
                 </div>
               </button>
             ))}
@@ -334,20 +319,49 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             </div>
           </div>
           {[
-            { title: "Путешественникам", links: ["Как это работает", "Поиск жилья", "Туры и экскурсии", "Рестораны", "Транспорт"] },
-            { title: "Владельцам", links: ["Разместить объект", "Тарифы", "Панель управления", "Аналитика", "Поддержка"] },
-            { title: "Компания", links: ["О нас", "Блог", "Карьера", "Пресс-центр", "Партнёрам"] },
+            {
+              title: "Путешественникам",
+              links: [
+                { label: "Поиск жилья", page: "search" },
+                { label: "Туры и экскурсии", page: "tours" },
+                { label: "Рестораны", page: "restaurants" },
+                { label: "FAQ", page: "faq" },
+              ],
+            },
+            {
+              title: "Владельцам",
+              links: [
+                { label: "Разместить объект", page: "add-listing" },
+                { label: "Тарифы", page: "pricing" },
+                { label: "Панель управления", page: "owner-dashboard" },
+              ],
+            },
+            {
+              title: "Компания",
+              links: [
+                { label: "О нас", page: "about" },
+                { label: "Контакты", page: "feedback" },
+              ],
+            },
           ].map((col) => (
             <div key={col.title}>
               <div className="font-semibold text-sm mb-3" style={{ color: "var(--text-primary)" }}>{col.title}</div>
-              <ul className="space-y-2">{col.links.map((link) => <li key={link}><a href="#" className="text-sm transition-colors hover:underline" style={{ color: "var(--text-secondary)" }}>{link}</a></li>)}</ul>
+              <ul className="space-y-2">{col.links.map((link) => (
+                <li key={link.label}>
+                  <button onClick={() => onNavigate(link.page)} className="text-sm transition-colors hover:underline" style={{ color: "var(--text-secondary)" }}>
+                    {link.label}
+                  </button>
+                </li>
+              ))}</ul>
             </div>
           ))}
         </div>
         <div className="max-w-7xl mx-auto mt-10 pt-6 border-t flex flex-col md:flex-row justify-between items-center gap-2" style={{ borderColor: "var(--border)" }}>
           <span className="text-xs" style={{ color: "var(--text-secondary)" }}>© 2024 IssykRelax. Все права защищены.</span>
           <div className="flex gap-4">
-            {["Политика конфиденциальности", "Условия использования", "Карта сайта"].map((link) => <a key={link} href="#" className="text-xs" style={{ color: "var(--text-secondary)" }}>{link}</a>)}
+            <button onClick={() => onNavigate("privacy")} className="text-xs" style={{ color: "var(--text-secondary)" }}>Политика конфиденциальности</button>
+            <button onClick={() => onNavigate("terms")} className="text-xs" style={{ color: "var(--text-secondary)" }}>Условия использования</button>
+            <button onClick={() => onNavigate("faq")} className="text-xs" style={{ color: "var(--text-secondary)" }}>FAQ</button>
           </div>
         </div>
       </footer>

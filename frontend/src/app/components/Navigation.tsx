@@ -14,18 +14,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useAuth } from "../context/AuthContext";
 import { getCategories } from "../services/properties";
 import type { CategoryResponse } from "../types/api";
-import { AuthModal } from "./AuthModal";
 
 interface NavigationProps {
   currentPage: string;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, params?: Record<string, string>) => void;
   isLoggedIn?: boolean;
   userRole?: "tourist" | "owner" | "admin";
 }
 
 export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRole = "tourist" }: NavigationProps) {
-  const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const { logout } = useAuth();
 
@@ -75,7 +72,7 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRol
               {categories.map((cat) => (
                 <button
                   key={cat.id}
-                  onClick={() => onNavigate("search", { category_id: cat.id })}
+                  onClick={() => onNavigate("category", { category_slug: cat.slug })}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                   style={{ background: "var(--surface)", color: "var(--text-secondary)" }}
                 >
@@ -141,8 +138,8 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRol
                 </DropdownMenu>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => { setAuthMode("login"); setAuthOpen(true); }}>Войти</Button>
-                  <Button size="sm" style={{ background: "var(--lake-blue)" }} onClick={() => { setAuthMode("register"); setAuthOpen(true); }}>Регистрация</Button>
+                  <Button variant="ghost" size="sm" onClick={() => onNavigate("login")}>Войти</Button>
+                  <Button size="sm" style={{ background: "var(--lake-blue)" }} onClick={() => onNavigate("register")}>Регистрация</Button>
                 </div>
               )}
             </div>
@@ -186,7 +183,7 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRol
             </button>
           ) : (
             <button
-              onClick={() => { setAuthMode("login"); setAuthOpen(true); }}
+              onClick={() => onNavigate("login")}
               className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
@@ -208,13 +205,6 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true, userRol
         </button>
       )}
 
-      <AuthModal
-        open={authOpen}
-        mode={authMode}
-        onClose={() => setAuthOpen(false)}
-        onSwitchMode={() => setAuthMode(authMode === "login" ? "register" : "login")}
-        onSuccess={() => setAuthOpen(false)}
-      />
     </>
   );
 }
