@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { MapPin, Clock, Phone, Utensils, Star, CheckCircle, Heart, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { SEO } from "./SEO";
-import { breadcrumbSchema } from "../lib/schemas";
+import { breadcrumbSchema, localBusinessSchema } from "../lib/schemas";
 import { getRestaurantApi } from "../services/restaurants-service";
 import type { RestaurantResponse } from "../types/api";
 import { PageBreadcrumbs } from "./PageBreadcrumbs";
@@ -48,11 +48,14 @@ export function RestaurantDetailPage({ onNavigate, restaurantId }: RestaurantDet
         title={`${restaurant.name} — Ресторан на Иссык-Куле`}
         description={`${restaurant.name}. ${restaurant.cuisine_type || "Разнообразная кухня"}. ${restaurant.address || "Иссык-Куль"}. ${restaurant.description?.slice(0, 150) || ""}`}
         canonical={`/restaurant/${restaurant.id}`}
-        jsonLd={breadcrumbSchema([
-          { name: "Главная", url: "/" },
-          { name: "Рестораны", url: "/restaurants" },
-          { name: restaurant.name, url: `/restaurant/${restaurant.id}` },
-        ])}
+        jsonLd={[
+          localBusinessSchema(),
+          breadcrumbSchema([
+            { name: "Главная", url: "/" },
+            { name: "Рестораны", url: "/restaurants" },
+            { name: restaurant.name, url: `/restaurant/${restaurant.id}` },
+          ]),
+        ]}
       />
 
       <div className="py-14 px-4 text-center text-white" style={{ background: "linear-gradient(135deg, var(--lake-blue-dark) 0%, var(--lake-blue) 100%)" }}>
