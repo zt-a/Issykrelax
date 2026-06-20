@@ -28,21 +28,28 @@ const CITY_ALIASES: Record<string, string> = {
 interface CityPageProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
   citySlug?: string;
+  initialCity?: CityResponse | null;
+  initialProperties?: PropertyResponse[];
+  initialTours?: TourResponse[];
+  initialRestaurants?: RestaurantResponse[];
+  initialActivities?: ActivityResponse[];
+  initialTransfers?: TransferResponse[];
 }
 
 type TabKey = "housing" | "restaurants" | "tours" | "activities" | "transfers";
 
-export function CityPage({ onNavigate, citySlug }: CityPageProps) {
-  const [city, setCity] = useState<CityResponse | null>(null);
-  const [properties, setProperties] = useState<PropertyResponse[]>([]);
-  const [tours, setTours] = useState<TourResponse[]>([]);
-  const [restaurants, setRestaurants] = useState<RestaurantResponse[]>([]);
-  const [activities, setActivities] = useState<ActivityResponse[]>([]);
-  const [transfers, setTransfers] = useState<TransferResponse[]>([]);
+export function CityPage({ onNavigate, citySlug, initialCity, initialProperties, initialTours, initialRestaurants, initialActivities, initialTransfers }: CityPageProps) {
+  const [city, setCity] = useState<CityResponse | null>(initialCity ?? null);
+  const [properties, setProperties] = useState<PropertyResponse[]>(initialProperties || []);
+  const [tours, setTours] = useState<TourResponse[]>(initialTours || []);
+  const [restaurants, setRestaurants] = useState<RestaurantResponse[]>(initialRestaurants || []);
+  const [activities, setActivities] = useState<ActivityResponse[]>(initialActivities || []);
+  const [transfers, setTransfers] = useState<TransferResponse[]>(initialTransfers || []);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>("housing");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const hasInitialData = initialProperties !== undefined;
   const displayName = city?.name || CITY_ALIASES[citySlug || ""] || citySlug || "Иссык-Куль";
   const cityName = displayName;
   const slug = citySlug || "";
@@ -64,6 +71,11 @@ export function CityPage({ onNavigate, citySlug }: CityPageProps) {
   ];
 
   useEffect(() => {
+    if (!slug) return;
+    if (hasInitialData) {
+      setLoading(false);
+      return;
+    }
     async function load() {
       setLoading(true);
       try {
@@ -97,7 +109,7 @@ export function CityPage({ onNavigate, citySlug }: CityPageProps) {
         setLoading(false);
       }
     }
-    if (slug) load();
+    load();
   }, [slug]);
 
   const counts = {

@@ -65,7 +65,7 @@ function deriveRoles(user: UserResponse | null): string[] {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const userRoles = deriveRoles(user);
   const hasRole = (role: string) => userRoles.includes(role);

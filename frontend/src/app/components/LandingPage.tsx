@@ -25,6 +25,13 @@ import type {
 
 interface LandingPageProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
+  initialCategories?: CategoryResponse[];
+  initialFeaturedProperties?: PropertyResponse[];
+  initialRestaurants?: RestaurantResponse[];
+  initialTours?: TourResponse[];
+  initialActivities?: ActivityResponse[];
+  initialTransfers?: TransferResponse[];
+  initialTourPackages?: TourPackageResponse[];
 }
 
 const CATEGORY_ICONS: Record<string, { icon: typeof Hotel; color: string }> = {
@@ -58,19 +65,35 @@ const CUISINE_FLAG: Record<string, string> = {
   "Азиатская": "🍜", "Кавказская": "🥩", "Итальянская": "🍝",
 };
 
-export function LandingPage({ onNavigate }: LandingPageProps) {
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const [featured, setFeatured] = useState<PropertyResponse[]>([]);
-  const [restaurants, setRestaurants] = useState<RestaurantResponse[]>([]);
-  const [tours, setTours] = useState<TourResponse[]>([]);
-  const [activities, setActivities] = useState<ActivityResponse[]>([]);
-  const [transfers, setTransfers] = useState<TransferResponse[]>([]);
-  const [packages, setPackages] = useState<TourPackageResponse[]>([]);
+export function LandingPage({
+  onNavigate,
+  initialCategories,
+  initialFeaturedProperties,
+  initialRestaurants,
+  initialTours,
+  initialActivities,
+  initialTransfers,
+  initialTourPackages,
+}: LandingPageProps) {
+  const [categories, setCategories] = useState<CategoryResponse[]>(initialCategories || []);
+  const [featured, setFeatured] = useState<PropertyResponse[]>(initialFeaturedProperties || []);
+  const [restaurants, setRestaurants] = useState<RestaurantResponse[]>(initialRestaurants || []);
+  const [tours, setTours] = useState<TourResponse[]>(initialTours || []);
+  const [activities, setActivities] = useState<ActivityResponse[]>(initialActivities || []);
+  const [transfers, setTransfers] = useState<TransferResponse[]>(initialTransfers || []);
+  const [packages, setPackages] = useState<TourPackageResponse[]>(initialTourPackages || []);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [destIdx, setDestIdx] = useState(0);
 
+  const hasInitialData = initialCategories && initialFeaturedProperties && initialRestaurants
+    && initialTours && initialActivities && initialTransfers && initialTourPackages;
+
   useEffect(() => {
+    if (hasInitialData) {
+      setLoading(false);
+      return;
+    }
     async function load() {
       try {
         const [cats, props, rests, ts, acts, trs, pkgs] = await Promise.all([

@@ -16,12 +16,14 @@ import type { PropertyResponse, ReviewResponse } from "../types/api";
 interface PropertyDetailsProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
   propertyId?: string;
+  initialProperty?: PropertyResponse | null;
+  initialReviews?: ReviewResponse[];
 }
 
-export function PropertyDetails({ onNavigate, propertyId }: PropertyDetailsProps) {
+export function PropertyDetails({ onNavigate, propertyId, initialProperty, initialReviews }: PropertyDetailsProps) {
   const { user } = useAuth();
-  const [property, setProperty] = useState<PropertyResponse | null>(null);
-  const [reviews, setReviews] = useState<ReviewResponse[]>([]);
+  const [property, setProperty] = useState<PropertyResponse | null>(initialProperty ?? null);
+  const [reviews, setReviews] = useState<ReviewResponse[]>(initialReviews || []);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [checkIn, setCheckIn] = useState("");
@@ -38,8 +40,14 @@ export function PropertyDetails({ onNavigate, propertyId }: PropertyDetailsProps
   const [similar, setSimilar] = useState<PropertyResponse[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  const hasInitialData = initialProperty !== undefined;
+
   useEffect(() => {
     if (!propertyId) return;
+    if (hasInitialData && initialProperty) {
+      setLoading(false);
+      return;
+    }
     async function load() {
       setLoading(true);
       try {

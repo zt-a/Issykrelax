@@ -17,11 +17,9 @@ import type { CategoryResponse } from "../types/api";
 
 interface NavigationProps {
   currentPage: string;
-  onNavigate: (page: string, params?: Record<string, string>) => void;
-  isLoggedIn?: boolean;
 }
 
-export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: NavigationProps) {
+export function Navigation({ currentPage }: NavigationProps) {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout, hasRole } = useAuth();
@@ -31,38 +29,38 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
   }, []);
 
   const navLinks = [
-    { label: "Главная", page: "landing" },
-    { label: "Жильё", page: "search" },
-    { label: "Туры", page: "tours" },
-    { label: "Рестораны", page: "restaurants" },
-    { label: "Активный отдых", page: "activities" },
-    { label: "Трансферы", page: "transfers" },
-    { label: "Пакетные туры", page: "tour-packages" },
+    { label: "Главная", href: "/" },
+    { label: "Жильё", href: "/search" },
+    { label: "Туры", href: "/tours" },
+    { label: "Рестораны", href: "/restaurants" },
+    { label: "Активный отдых", href: "/activities" },
+    { label: "Трансферы", href: "/transfers" },
+    { label: "Пакетные туры", href: "/tour-packages" },
   ];
 
   const moreLinks = [
-    { label: "О нас", page: "about", icon: Info },
-    { label: "Обратная связь", page: "feedback", icon: MessageSquare },
+    { label: "О нас", href: "/about", icon: Info },
+    { label: "Обратная связь", href: "/feedback", icon: MessageSquare },
   ];
 
   const mobileExtraLinks = [
-    { label: "Активный отдых", page: "activities", icon: Mountain },
-    { label: "Трансферы", page: "transfers", icon: Car },
-    { label: "Пакетные туры", page: "tour-packages", icon: Backpack },
-    { label: "О нас", page: "about", icon: Info },
-    { label: "Обратная связь", page: "feedback", icon: MessageSquare },
+    { label: "Активный отдых", href: "/activities", icon: Mountain },
+    { label: "Трансферы", href: "/transfers", icon: Car },
+    { label: "Пакетные туры", href: "/tour-packages", icon: Backpack },
+    { label: "О нас", href: "/about", icon: Info },
+    { label: "Обратная связь", href: "/feedback", icon: MessageSquare },
   ];
 
-  const mobileNavIcons: Record<string, React.ReactNode> = {
-    landing: <Home size={20} />,
-    search: <Search size={20} />,
-    tours: <Compass size={20} />,
-    restaurants: <Utensils size={20} />,
-    activities: <Mountain size={20} />,
-    transfers: <Car size={20} />,
-    "tour-packages": <Backpack size={20} />,
-    about: <Info size={20} />,
-    feedback: <MessageSquare size={20} />,
+  const mobileNavItems = [
+    { label: "Главная", href: "/", icon: <Home size={20} /> },
+    { label: "Жильё", href: "/search", icon: <Search size={20} /> },
+    { label: "Туры", href: "/tours", icon: <Compass size={20} /> },
+    { label: "Рестораны", href: "/restaurants", icon: <Utensils size={20} /> },
+  ];
+
+  const isActive = (href: string) => {
+    if (href === "/") return currentPage === "landing";
+    return currentPage === href.slice(1);
   };
 
   return (
@@ -72,30 +70,27 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <button
-              onClick={() => onNavigate("landing")}
-              className="flex items-center gap-2 flex-shrink-0"
-            >
+            <a href="/" className="flex items-center gap-2 flex-shrink-0">
               <img src={logotip} alt="IssykRelax" className="h-8 w-auto" />
               <span className="font-bold text-lg" style={{ color: "var(--lake-blue)", fontFamily: "var(--font-display)" }}>
                 IssykRelax
               </span>
-            </button>
+            </a>
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (
-                <button
-                  key={link.page}
-                  onClick={() => onNavigate(link.page)}
+                <a
+                  key={link.href}
+                  href={link.href}
                   className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={{
-                    color: currentPage === link.page ? "var(--lake-blue)" : "var(--text-secondary)",
-                    background: currentPage === link.page ? "var(--lake-blue-light)" : "transparent",
+                    color: isActive(link.href) ? "var(--lake-blue)" : "var(--text-secondary)",
+                    background: isActive(link.href) ? "var(--lake-blue-light)" : "transparent",
                   }}
                 >
                   {link.label}
-                </button>
+                </a>
               ))}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -105,14 +100,16 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
                   {moreLinks.map((link) => (
-                    <DropdownMenuItem key={link.page} onClick={() => onNavigate(link.page)}>
-                      <link.icon size={15} className="mr-2" /> {link.label}
+                    <DropdownMenuItem key={link.href} asChild>
+                      <a href={link.href} className="flex items-center">
+                        <link.icon size={15} className="mr-2" /> {link.label}
+                      </a>
                     </DropdownMenuItem>
                   ))}
                   {categories.length > 0 && <DropdownMenuSeparator />}
                   {categories.map((cat) => (
-                    <DropdownMenuItem key={cat.id} onClick={() => onNavigate("category", { category_slug: cat.slug })}>
-                      {cat.name}
+                    <DropdownMenuItem key={cat.id} asChild>
+                      <a href={`/category/${cat.slug}`}>{cat.name}</a>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -122,13 +119,13 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
             {/* Right side */}
             <div className="hidden md:flex items-center gap-3">
               {hasRole("owner") && (
-                <button
-                  onClick={() => onNavigate("add-listing")}
+                <a
+                  href="/add-listing"
                   className="text-sm font-medium px-4 py-2 rounded-lg transition-colors"
                   style={{ color: "var(--lake-blue)", background: "var(--lake-blue-light)" }}
                 >
                   + Добавить объект
-                </button>
+                </a>
               )}
 
               <button className="flex items-center gap-1 text-sm px-3 py-2 rounded-lg" style={{ color: "var(--text-secondary)" }}>
@@ -137,7 +134,7 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
                 <ChevronDown size={14} />
               </button>
 
-              {isLoggedIn ? (
+              {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2 p-1.5 rounded-xl border transition-shadow hover:shadow-md" style={{ borderColor: "var(--border)" }}>
@@ -149,75 +146,75 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-52">
-                    <DropdownMenuItem onClick={() => onNavigate("dashboard")}>
-                      <User size={15} className="mr-2" /> Мой профиль
+                    <DropdownMenuItem asChild>
+                      <a href="/dashboard" className="flex items-center"><User size={15} className="mr-2" /> Мой профиль</a>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onNavigate("dashboard")}>
-                      <Heart size={15} className="mr-2" /> Избранное
+                    <DropdownMenuItem asChild>
+                      <a href="/dashboard" className="flex items-center"><Heart size={15} className="mr-2" /> Избранное</a>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onNavigate("dashboard")}>
-                      <Bell size={15} className="mr-2" /> Уведомления
+                    <DropdownMenuItem asChild>
+                      <a href="/dashboard" className="flex items-center"><Bell size={15} className="mr-2" /> Уведомления</a>
                     </DropdownMenuItem>
                     {hasRole("owner") && (
-                      <DropdownMenuItem onClick={() => onNavigate("owner-dashboard")}>
-                        <LayoutDashboard size={15} className="mr-2" /> Панель владельца
+                      <DropdownMenuItem asChild>
+                        <a href="/owner-dashboard" className="flex items-center"><LayoutDashboard size={15} className="mr-2" /> Панель владельца</a>
                       </DropdownMenuItem>
                     )}
                     {hasRole("driver") && (
-                      <DropdownMenuItem onClick={() => onNavigate("driver-dashboard")}>
-                        <Car size={15} className="mr-2" /> Панель водителя
+                      <DropdownMenuItem asChild>
+                        <a href="/driver-dashboard" className="flex items-center"><Car size={15} className="mr-2" /> Панель водителя</a>
                       </DropdownMenuItem>
                     )}
                     {hasRole("guide") && (
-                      <DropdownMenuItem onClick={() => onNavigate("guide-dashboard")}>
-                        <Compass size={15} className="mr-2" /> Панель гида
+                      <DropdownMenuItem asChild>
+                        <a href="/guide-dashboard" className="flex items-center"><Compass size={15} className="mr-2" /> Панель гида</a>
                       </DropdownMenuItem>
                     )}
                     {hasRole("activity_provider") && (
-                      <DropdownMenuItem onClick={() => onNavigate("activity-dashboard")}>
-                        <Dumbbell size={15} className="mr-2" /> Панель аниматора
+                      <DropdownMenuItem asChild>
+                        <a href="/activity-dashboard" className="flex items-center"><Dumbbell size={15} className="mr-2" /> Панель аниматора</a>
                       </DropdownMenuItem>
                     )}
                     {hasRole("restaurant_partner") && (
-                      <DropdownMenuItem onClick={() => onNavigate("restaurant-dashboard")}>
-                        <Utensils size={15} className="mr-2" /> Панель ресторана
+                      <DropdownMenuItem asChild>
+                        <a href="/restaurant-dashboard" className="flex items-center"><Utensils size={15} className="mr-2" /> Панель ресторана</a>
                       </DropdownMenuItem>
                     )}
                     {hasRole("agency") && (
-                      <DropdownMenuItem onClick={() => onNavigate("agency-dashboard")}>
-                        <Building2 size={15} className="mr-2" /> Панель агентства
+                      <DropdownMenuItem asChild>
+                        <a href="/agency-dashboard" className="flex items-center"><Building2 size={15} className="mr-2" /> Панель агентства</a>
                       </DropdownMenuItem>
                     )}
                     {hasRole("concierge") && (
-                      <DropdownMenuItem onClick={() => onNavigate("concierge-dashboard")}>
-                        <Bell size={15} className="mr-2" /> Панель консьержа
+                      <DropdownMenuItem asChild>
+                        <a href="/concierge-dashboard" className="flex items-center"><Bell size={15} className="mr-2" /> Панель консьержа</a>
                       </DropdownMenuItem>
                     )}
                     {hasRole("translator") && (
-                      <DropdownMenuItem onClick={() => onNavigate("translator-dashboard")}>
-                        <Languages size={15} className="mr-2" /> Панель переводчика
+                      <DropdownMenuItem asChild>
+                        <a href="/translator-dashboard" className="flex items-center"><Languages size={15} className="mr-2" /> Панель переводчика</a>
                       </DropdownMenuItem>
                     )}
                     {(hasRole("admin") || hasRole("moderator")) && (
-                      <DropdownMenuItem onClick={() => onNavigate("moderator")}>
-                        <Shield size={15} className="mr-2" /> Модерация
+                      <DropdownMenuItem asChild>
+                        <a href="/moderator" className="flex items-center"><Shield size={15} className="mr-2" /> Модерация</a>
                       </DropdownMenuItem>
                     )}
                     {hasRole("admin") && (
-                      <DropdownMenuItem onClick={() => onNavigate("admin")}>
-                        <Settings size={15} className="mr-2" /> Администратор
+                      <DropdownMenuItem asChild>
+                        <a href="/admin" className="flex items-center"><Settings size={15} className="mr-2" /> Администратор</a>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => { logout(); onNavigate("landing"); }}>
+                    <DropdownMenuItem onClick={() => { logout(); window.location.href = "/"; }}>
                       <LogOut size={15} className="mr-2" /> Выйти
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => onNavigate("login")}>Войти</Button>
-                  <Button size="sm" style={{ background: "var(--lake-blue)" }} onClick={() => onNavigate("register")}>Регистрация</Button>
+                  <Button variant="ghost" size="sm" asChild><a href="/login">Войти</a></Button>
+                  <Button size="sm" style={{ background: "var(--lake-blue)" }} asChild><a href="/register">Регистрация</a></Button>
                 </div>
               )}
             </div>
@@ -228,28 +225,21 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t" style={{ background: "var(--background)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-around h-16 px-2">
-          {/* Always visible: Главная, Жильё, Туры, Рестораны */}
-          {[
-            { label: "Главная", page: "landing" },
-            { label: "Жильё", page: "search" },
-            { label: "Туры", page: "tours" },
-            { label: "Рестораны", page: "restaurants" },
-          ].map((link) => {
-            const isActive = currentPage === link.page;
+          {mobileNavItems.map((item) => {
+            const active = isActive(item.href);
             return (
-              <button
-                key={link.page}
-                onClick={() => onNavigate(link.page)}
+              <a
+                key={item.href}
+                href={item.href}
                 className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-colors"
-                style={{ color: isActive ? "var(--lake-blue)" : "var(--text-secondary)" }}
+                style={{ color: active ? "var(--lake-blue)" : "var(--text-secondary)" }}
               >
-                {mobileNavIcons[link.page]}
-                <span className="text-[10px] font-medium">{link.label}</span>
-              </button>
+                {item.icon}
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </a>
             );
           })}
 
-          {/* Ещё button */}
           <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <DropdownMenuTrigger asChild>
               <button className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-colors" style={{ color: "var(--text-secondary)" }}>
@@ -261,30 +251,36 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
               {mobileExtraLinks.map((link) => {
                 const Icon = link.icon;
                 return (
-                  <DropdownMenuItem key={link.page} onClick={() => { onNavigate(link.page); setMobileMenuOpen(false); }}>
-                    <Icon size={15} className="mr-2" /> {link.label}
+                  <DropdownMenuItem key={link.href} asChild>
+                    <a href={link.href} className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                      <Icon size={15} className="mr-2" /> {link.label}
+                    </a>
                   </DropdownMenuItem>
                 );
               })}
               {categories.length > 0 && <DropdownMenuSeparator />}
               {categories.map((cat) => (
-                <DropdownMenuItem key={cat.id} onClick={() => { onNavigate("category", { category_slug: cat.slug }); setMobileMenuOpen(false); }}>
-                  {cat.name}
+                <DropdownMenuItem key={cat.id} asChild>
+                  <a href={`/category/${cat.slug}`} onClick={() => setMobileMenuOpen(false)}>{cat.name}</a>
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              {isLoggedIn ? (
+              {user ? (
                 <>
-                  <DropdownMenuItem onClick={() => { onNavigate("dashboard"); setMobileMenuOpen(false); }}>
-                    <User size={15} className="mr-2" /> Профиль
+                  <DropdownMenuItem asChild>
+                    <a href="/dashboard" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                      <User size={15} className="mr-2" /> Профиль
+                    </a>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { logout(); onNavigate("landing"); setMobileMenuOpen(false); }}>
+                  <DropdownMenuItem onClick={() => { logout(); window.location.href = "/"; setMobileMenuOpen(false); }}>
                     <LogOut size={15} className="mr-2" /> Выйти
                   </DropdownMenuItem>
                 </>
               ) : (
-                <DropdownMenuItem onClick={() => { onNavigate("login"); setMobileMenuOpen(false); }}>
-                  <LogIn size={15} className="mr-2" /> Войти
+                <DropdownMenuItem asChild>
+                  <a href="/login" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                    <LogIn size={15} className="mr-2" /> Войти
+                  </a>
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -294,13 +290,13 @@ export function Navigation({ currentPage, onNavigate, isLoggedIn = true }: Navig
 
       {/* Mobile FAB for owner add-listing */}
       {hasRole("owner") && (
-        <button
-          onClick={() => onNavigate("add-listing")}
+        <a
+          href="/add-listing"
           className="md:hidden fixed z-50 bottom-20 right-4 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white"
           style={{ background: "var(--lake-blue)" }}
         >
           <Plus size={24} />
-        </button>
+        </a>
       )}
     </>
   );

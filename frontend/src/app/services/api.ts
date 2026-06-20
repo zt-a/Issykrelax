@@ -11,23 +11,27 @@ export function buildQueryString(params?: Record<string, unknown>): string {
 }
 
 function getToken(): string | null {
+  if (typeof localStorage === "undefined") return null;
   return localStorage.getItem("access_token");
 }
 
 export function setToken(token: string) {
-  localStorage.setItem("access_token", token);
+  if (typeof localStorage !== "undefined") localStorage.setItem("access_token", token);
 }
 
 export function setRefreshToken(token: string) {
-  localStorage.setItem("refresh_token", token);
+  if (typeof localStorage !== "undefined") localStorage.setItem("refresh_token", token);
 }
 
 export function clearTokens() {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
+  if (typeof localStorage !== "undefined") {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+  }
 }
 
 export function getRefreshToken(): string | null {
+  if (typeof localStorage === "undefined") return null;
   return localStorage.getItem("refresh_token");
 }
 

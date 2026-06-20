@@ -75,6 +75,17 @@ services:
         condition: service_healthy
     command: celery -A app.infrastructure.tasks.worker beat -l info
 
+  ssr-server:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.ssr
+    <<: [*restart, *app-env]
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    depends_on:
+      - backend
+
   frontend-builder:
     image: node:22-alpine
     working_dir: /app
@@ -93,11 +104,11 @@ services:
       - "443:443"
     volumes:
       - ./nginx/issykrelax.conf:/etc/nginx/conf.d/default.conf:ro
-      - frontend-dist:/usr/share/nginx/html:ro
       - certbot-www:/var/www/certbot:ro
       - certbot-conf:/etc/letsencrypt:ro
     depends_on:
       - backend
+      - ssr-server
 
   certbot:
     image: certbot/certbot

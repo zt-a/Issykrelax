@@ -41,11 +41,13 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 interface CategoryPageProps {
   onNavigate: (page: string, params?: Record<string, string>) => void;
   categorySlug?: string;
+  initialCategory?: CategoryResponse | null;
+  initialProperties?: PropertyResponse[];
 }
 
-export function CategoryPage({ onNavigate, categorySlug }: CategoryPageProps) {
-  const [category, setCategory] = useState<CategoryResponse | null>(null);
-  const [properties, setProperties] = useState<PropertyResponse[]>([]);
+export function CategoryPage({ onNavigate, categorySlug, initialCategory, initialProperties }: CategoryPageProps) {
+  const [category, setCategory] = useState<CategoryResponse | null>(initialCategory ?? null);
+  const [properties, setProperties] = useState<PropertyResponse[]>(initialProperties || []);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -57,6 +59,11 @@ export function CategoryPage({ onNavigate, categorySlug }: CategoryPageProps) {
   const categoryIcon = CATEGORY_ICONS[slug] || <Home size={24} />;
 
   useEffect(() => {
+    if (!slug) return;
+    if (initialCategory && initialProperties) {
+      setLoading(false);
+      return;
+    }
     async function load() {
       setLoading(true);
       try {
@@ -71,7 +78,7 @@ export function CategoryPage({ onNavigate, categorySlug }: CategoryPageProps) {
         setLoading(false);
       }
     }
-    if (slug) load();
+    load();
   }, [slug]);
 
   const filtered = search
