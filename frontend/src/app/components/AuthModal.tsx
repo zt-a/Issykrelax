@@ -210,14 +210,7 @@ export function AuthModal({ open, mode, onClose, onSwitchMode, onSuccess }: Auth
           onBack={() => setShowForgot(false)}
         />
 
-        {mode === "login" && (
-          <div className="mt-4 p-3 rounded-xl text-xs" style={{ background: "var(--lake-blue-light)", color: "var(--text-secondary)" }}>
-            <p className="font-medium mb-1">Тестовые аккаунты:</p>
-            {/* <p>admin@issykrelax.kg / admin123</p> */}
-            <p>owner@issykrelax.kg / owner123</p>
-            <p>user@issykrelax.kg / user123</p>
-          </div>
-        )}
+
       </div>
     </div>
   );
