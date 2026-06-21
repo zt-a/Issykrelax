@@ -113,6 +113,27 @@ function AppContent() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  const navigate = (page: string, extra?: NavParams) => {
+    let path: string;
+    if (page === "property" && extra?.property_id) path = `/property/${extra.property_id}`;
+    else if (page === "city" && extra?.city_slug) path = `/city/${extra.city_slug}`;
+    else if (page === "category" && extra?.category_slug) path = `/category/${extra.category_slug}`;
+    else if (page === "activity" && extra?.activity_id) path = `/activity/${extra.activity_id}`;
+    else if (page === "transfer" && extra?.transfer_id) path = `/transfer/${extra.transfer_id}`;
+    else if (page === "tour" && extra?.tour_id) path = `/tour/${extra.tour_id}`;
+    else if (page === "tour-package" && extra?.pkg_id) path = `/tour-package/${extra.pkg_id}`;
+    else if (page === "restaurant" && extra?.restaurant_id) path = `/restaurant/${extra.restaurant_id}`;
+    else if (page === "search") {
+      const sp = new URLSearchParams();
+      if (extra) Object.entries(extra).forEach(([k, v]) => { if (v !== undefined) sp.set(k, v); });
+      path = `/search${sp.toString() ? `?${sp}` : ""}`;
+    } else if (page === "landing") path = "/";
+    else path = `/${page}`;
+    window.history.pushState({}, "", path);
+    setRoute({ page: page as Page, params: extra || {} });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
 
@@ -149,27 +170,6 @@ function AppContent() {
     document.addEventListener("click", handler, true);
     return () => document.removeEventListener("click", handler, true);
   }, []);
-
-  const navigate = (page: string, extra?: NavParams) => {
-    let path: string;
-    if (page === "property" && extra?.property_id) path = `/property/${extra.property_id}`;
-    else if (page === "city" && extra?.city_slug) path = `/city/${extra.city_slug}`;
-    else if (page === "category" && extra?.category_slug) path = `/category/${extra.category_slug}`;
-    else if (page === "activity" && extra?.activity_id) path = `/activity/${extra.activity_id}`;
-    else if (page === "transfer" && extra?.transfer_id) path = `/transfer/${extra.transfer_id}`;
-    else if (page === "tour" && extra?.tour_id) path = `/tour/${extra.tour_id}`;
-    else if (page === "tour-package" && extra?.pkg_id) path = `/tour-package/${extra.pkg_id}`;
-    else if (page === "restaurant" && extra?.restaurant_id) path = `/restaurant/${extra.restaurant_id}`;
-    else if (page === "search") {
-      const sp = new URLSearchParams();
-      if (extra) Object.entries(extra).forEach(([k, v]) => { if (v !== undefined) sp.set(k, v); });
-      path = `/search${sp.toString() ? `?${sp}` : ""}`;
-    } else if (page === "landing") path = "/";
-    else path = `/${page}`;
-    window.history.pushState({}, "", path);
-    setRoute({ page: page as Page, params: extra || {} });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   const noNavPages: Page[] = ["add-listing"];
   const showNav = !noNavPages.includes(currentPage);

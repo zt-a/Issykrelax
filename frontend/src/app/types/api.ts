@@ -298,6 +298,7 @@ export interface RestaurantResponse {
   price_range: string | null;
   opening_hours: string | null;
   city_id: string | null;
+  city?: { id: string; name: string; slug?: string };
   status: string;
   is_active: boolean;
   created_at: string;
