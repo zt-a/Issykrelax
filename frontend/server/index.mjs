@@ -32,6 +32,66 @@ async function start() {
     return import("../dist/server/entry.js")
   }
 
+  app.get("/sitemap.xml", async (req, res) => {
+    const BASE_URL = "https://issykrelax.kg"
+    const apiBase = process.env.API_INTERNAL_URL || (isDev ? "http://localhost:8000/api/v1" : "http://backend:8000/api/v1")
+    const cacheMaxAge = isDev ? 0 : 3600
+
+    try {
+      const [cats, cities, props] = await Promise.all([
+        fetch(`${apiBase}/categories/`).then(r => r.ok ? r.json() : []),
+        fetch(`${apiBase}/cities/`).then(r => r.ok ? r.json() : []),
+        fetch(`${apiBase}/properties/?limit=1000&status=active`).then(r => r.ok ? r.json() : { items: [] }),
+      ])
+
+      const today = new Date().toISOString().split("T")[0]
+      const items = props.items || props || []
+      const catsArr = Array.isArray(cats) ? cats : []
+      const citiesArr = Array.isArray(cities) ? cities : []
+
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+
+      const add = (loc, freq, prio) => {
+        xml += `  <url><loc>${BASE_URL}${loc}</loc><lastmod>${today}</lastmod><changefreq>${freq}</changefreq><priority>${prio}</priority></url>\n`
+      }
+
+      add("/", "daily", "1.0")
+      add("/search", "daily", "0.8")
+      add("/restaurants", "weekly", "0.7")
+      add("/tours", "weekly", "0.7")
+      add("/activities", "weekly", "0.7")
+      add("/transfers", "weekly", "0.7")
+      add("/tour-packages", "weekly", "0.7")
+      add("/about", "monthly", "0.5")
+      add("/feedback", "monthly", "0.5")
+      add("/pricing", "monthly", "0.5")
+      add("/privacy", "monthly", "0.3")
+      add("/terms", "monthly", "0.3")
+      add("/faq", "monthly", "0.5")
+
+      for (const p of items) {
+        add(`/property/${p.id}`, "weekly", "0.8")
+      }
+
+      for (const c of catsArr) {
+        add(`/category/${c.slug}`, "weekly", "0.7")
+      }
+
+      for (const c of citiesArr) {
+        add(`/city/${c.slug}`, "weekly", "0.7")
+      }
+
+      xml += "</urlset>"
+
+      res.header("Content-Type", "application/xml")
+      res.header("Cache-Control", `public, max-age=${cacheMaxAge}`)
+      res.send(xml)
+    } catch (e) {
+      console.error("Sitemap generation error:", e)
+      res.status(500).type("text/plain").send("Sitemap generation failed")
+    }
+  })
+
   app.use(async (req, res, next) => {
     if (req.method !== "GET") return next()
 

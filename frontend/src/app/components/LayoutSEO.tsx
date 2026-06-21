@@ -18,8 +18,6 @@ export function LayoutSEO() {
       <meta name="twitter:card" content="summary_large_image" />
 
       <link rel="icon" type="image/png" href="/logo.png" />
-      <link rel="canonical" href={BASE_URL} />
-
       <link rel="alternate" hrefLang="ru" href={BASE_URL} />
 
       <script type="application/ld+json">

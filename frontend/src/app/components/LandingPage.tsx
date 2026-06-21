@@ -198,6 +198,35 @@ export function LandingPage({
         </div>
       </section>
 
+      {/* ────── ABOUT ISSYK-KUL ────── */}
+      <section className="py-16 px-4" style={{ background: "var(--surface)" }}>
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-6" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>
+            Иссык-Куль — жемчужина Кыргызстана
+          </h2>
+          <div className="space-y-4 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            <p>
+              Иссык-Куль — одно из крупнейших высокогорных озёр в мире, расположенное в северо-восточной части Кыргызстана,
+              в живописной Иссык-Кульской котловине между хребтами Терскей-Ала-Тоо и Кунгей-Ала-Тоо. Благодаря уникальному
+              микроклимату озеро не замерзает зимой — температура воды даже в январе не опускается ниже +4°C, а летом
+              прогревается до +24°C. Неудивительно, что его называют «жемчужиной Кыргызстана» и «тёплым озером».
+            </p>
+            <p>
+              Протяжённость побережья Иссык-Куля — более 180 километров золотистых песчаных и галечных пляжей. Здесь каждый
+              найдёт отдых по душе: от уютных коттеджей для семейного отдыха до роскошных курортов с SPA-центрами, бассейнами
+              и ресторанами. Главные курортные зоны — Чолпон-Ата, Бостери, Кара-Ой, Тамчы, Чок-Тал — предлагают развитую
+              туристическую инфраструктуру с аквапарками, конными прогулками, дайвинг-центрами и ночными клубами.
+            </p>
+            <p>
+              Кыргызстан стремительно набирает популярность как международное туристическое направление. Сочетание доступных цен,
+              уникальной природы Тянь-Шаня, богатого культурного наследия кочевого народа и тёплого гостеприимства привлекает
+              путешественников со всего мира. IssykRelax помогает легко находить и бронировать лучшие варианты жилья, туров,
+              ресторанов и услуг на побережье Иссык-Куля — всё в одном месте, без посредников и переплат.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ────── CATEGORIES ────── */}
       <section className="py-14 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-10">
@@ -711,7 +740,13 @@ export function LandingPage({
       {/* ────── WHY US ────── */}
       <section className="py-14 px-4" style={{ background: "var(--surface)" }}>
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-10" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>Почему выбирают IssykRelax</h2>
+          <h2 className="text-3xl font-bold mb-4" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>Почему выбирают IssykRelax</h2>
+          <p className="text-sm mb-10 max-w-3xl mx-auto" style={{ color: "var(--text-secondary)" }}>
+            IssykRelax — крупнейший маркетплейс отдыха на Иссык-Куле, объединяющий тысячи проверенных
+            объектов размещения, ресторанов, туров и услуг. Мы лично проверяем каждого партнёра,
+            гарантируем безопасность бронирований и поддерживаем путешественников 24/7. Вот почему
+            тысячи гостей выбирают нас для своего отдыха в Кыргызстане.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: Shield, title: "Безопасное бронирование", desc: "Все объекты проходят проверку. Ваши данные под надёжной защитой." },
@@ -731,6 +766,30 @@ export function LandingPage({
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* ────── HOW IT WORKS ────── */}
+      <section className="py-16 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-3" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>Как забронировать отдых на Иссык-Куле</h2>
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Всего несколько шагов до незабываемого отпуска</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {[
+            { step: "01", title: "Найдите", desc: "Ищите жильё, туры, рестораны или трансферы по категориям, городам и фильтрам" },
+            { step: "02", title: "Сравните", desc: "Изучайте фотографии, читайте реальные отзывы гостей и сравнивайте цены" },
+            { step: "03", title: "Забронируйте", desc: "Бронируйте в один клик — мгновенное подтверждение без звонков и очередей" },
+            { step: "04", title: "Отдохните", desc: "Приезжайте и наслаждайтесь отдыхом, а мы всегда на связи, если нужна помощь" },
+          ].map((item) => (
+            <div key={item.step} className="text-center p-6 rounded-2xl border shadow-sm hover:shadow-md transition-shadow" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-sm" style={{ background: "var(--lake-blue-light)", color: "var(--lake-blue)" }}>
+                {item.step}
+              </div>
+              <div className="font-semibold mb-2" style={{ color: "var(--text-primary)" }}>{item.title}</div>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{item.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
